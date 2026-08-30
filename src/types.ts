@@ -11,6 +11,8 @@ export interface Question {
   correctIndex: number; // 0, 1, 2, 3
   explanation: string;
   topic?: string;
+  cp?: string;
+  indicator?: string;
 }
 
 export interface PackageQuestion {
@@ -24,6 +26,8 @@ export interface PackageQuestion {
   correctLetter: 'A' | 'B' | 'C' | 'D';
   explanation: string;
   topic?: string;
+  cp?: string;
+  indicator?: string;
 }
 
 export type PackageKey = 'A' | 'B' | 'C' | 'D';

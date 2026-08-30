@@ -9,6 +9,11 @@
   }
 }
 
+@page {
+  size: A4 portrait;
+  margin: 10mm 12mm 10mm 12mm;
+}
+
 @media print {
   .no-print {
     display: none !important;
@@ -19,7 +24,10 @@
   body {
     background: white !important;
     color: #0f172a !important;
-    font-size: 11pt !important;
+    font-size: 9.5pt !important;
+    line-height: 1.35 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   .page-break {
     page-break-before: always;
@@ -28,6 +36,37 @@
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Two Column Newspaper Layout for Exam Paper */
+  .exam-columns {
+    column-count: 2 !important;
+    column-gap: 8mm !important;
+    column-rule: 1px solid #cbd5e1 !important;
+    width: 100% !important;
+  }
+
+  /* Question Item within Column */
+  .exam-question-item {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-bottom: 7px !important;
+    padding-bottom: 6px !important;
+    border-bottom: 1px dotted #e2e8f0 !important;
+  }
+
+  .exam-question-item:last-child {
+    border-bottom: none !important;
+  }
+
+  .exam-header {
+    border-bottom: 2px solid #0f172a !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 8px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }
 

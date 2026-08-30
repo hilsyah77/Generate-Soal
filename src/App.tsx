@@ -10,13 +10,15 @@ import { generatePackages } from './utils/generator';
 import { Navbar } from './components/Navbar';
 import { GeneratorTab } from './components/GeneratorTab';
 import { BankTab } from './components/BankTab';
+import { KisiKisiTab } from './components/KisiKisiTab';
 import { StudentExamSimulator } from './components/StudentExamSimulator';
 import { AnswerMatrixModal } from './components/AnswerMatrixModal';
 import { QuestionModal } from './components/QuestionModal';
 import { SchoolHeaderModal, defaultExamHeader } from './components/SchoolHeaderModal';
+import { MaterialUploadModal } from './components/MaterialUploadModal';
 import { ToastContainer, ToastMessage } from './components/Toast';
 
-const STORAGE_KEY_BANK = 'smp_informatics_grade9_bank_v2';
+const STORAGE_KEY_BANK = 'smp_informatics_grade9_bank_v3';
 const STORAGE_KEY_HEADER = 'smp_informatics_grade9_header_v2';
 
 export default function App() {
@@ -26,7 +28,7 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEY_BANK);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length >= DEFAULT_QUESTIONS.length) return parsed;
       }
     } catch (e) {
       console.error('Failed to load bank from storage:', e);
@@ -60,10 +62,11 @@ export default function App() {
   const [packages, setPackages] = useState<GeneratedPackages>({});
 
   // 5. Navigation & Modal States
-  const [activeTab, setActiveTab] = useState<'generator' | 'bank' | 'student' | 'matrix'>('generator');
+  const [activeTab, setActiveTab] = useState<'generator' | 'bank' | 'kisikisi' | 'student' | 'matrix'>('generator');
   const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
   const [questionToEdit, setQuestionToEdit] = useState<Question | null>(null);
   const [isHeaderModalOpen, setIsHeaderModalOpen] = useState(false);
+  const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
 
   // 6. Toasts State
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -130,6 +133,11 @@ export default function App() {
     showToast('Soal berhasil disimpan ke bank soal!', 'success');
   };
 
+  const handleAddMultipleQuestions = (newQuestions: Question[]) => {
+    setQuestionBank((prev) => [...newQuestions, ...prev]);
+    showToast(`Berhasil menambahkan ${newQuestions.length} butir soal ke Bank Soal!`, 'success');
+  };
+
   const handleDeleteQuestion = (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus butir soal ini dari bank?')) {
       setQuestionBank((prev) => prev.filter((q) => q.id !== id));
@@ -160,6 +168,7 @@ export default function App() {
           setIsQuestionModalOpen(true);
         }}
         onOpenHeaderModal={() => setIsHeaderModalOpen(true)}
+        onOpenMaterialModal={() => setIsMaterialModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -173,6 +182,19 @@ export default function App() {
             onGenerate={handleGenerate}
             headerConfig={headerConfig}
             onToast={showToast}
+            onOpenHeaderModal={() => setIsHeaderModalOpen(true)}
+            onOpenKisiKisi={() => setActiveTab('kisikisi')}
+            onOpenMaterialModal={() => setIsMaterialModalOpen(true)}
+          />
+        )}
+
+        {activeTab === 'kisikisi' && (
+          <KisiKisiTab
+            questionBank={questionBank}
+            packages={packages}
+            headerConfig={headerConfig}
+            onToast={showToast}
+            onNavigateToGenerator={() => setActiveTab('generator')}
             onOpenHeaderModal={() => setIsHeaderModalOpen(true)}
           />
         )}
@@ -228,6 +250,14 @@ export default function App() {
         }}
       />
 
+      {/* Material Upload & Automatic Question Generator Modal */}
+      <MaterialUploadModal
+        isOpen={isMaterialModalOpen}
+        onClose={() => setIsMaterialModalOpen(false)}
+        onAddQuestionsToBank={handleAddMultipleQuestions}
+        onToast={showToast}
+      />
+
       {/* Toast Notification Container */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
@@ -238,10 +268,11 @@ export default function App() {
             <strong>Generator Soal Informatika IX</strong> • Kurikulum Merdeka (Fase D SMP)
           </p>
           <p className="text-slate-400">
-            Didesain untuk Mempermudah Guru Menyusun & Mengacak Paket Penilaian Asesmen
+            Didesain untuk Mempermudah Guru Menyusun Kisi-Kisi, Mengunggah Materi, & Mengacak Paket Penilaian Asesmen
           </p>
         </div>
       </footer>
     </div>
   );
 }
+

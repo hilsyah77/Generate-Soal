@@ -6,15 +6,19 @@ import {
   FileSpreadsheet, 
   GraduationCap, 
   Settings2,
-  Layers
+  Layers,
+  BookOpen,
+  UploadCloud,
+  FileCheck2,
 } from 'lucide-react';
 
 interface NavbarProps {
-  activeTab: 'generator' | 'bank' | 'student' | 'matrix';
-  setActiveTab: (tab: 'generator' | 'bank' | 'student' | 'matrix') => void;
+  activeTab: 'generator' | 'bank' | 'kisikisi' | 'student' | 'matrix';
+  setActiveTab: (tab: 'generator' | 'bank' | 'kisikisi' | 'student' | 'matrix') => void;
   bankCount: number;
   onOpenAddModal: () => void;
   onOpenHeaderModal: () => void;
+  onOpenMaterialModal: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -23,6 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   bankCount,
   onOpenAddModal,
   onOpenHeaderModal,
+  onOpenMaterialModal,
 }) => {
   return (
     <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 no-print shadow-md">
@@ -43,13 +48,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-400 font-medium hidden sm:block">
-              Randomizer Paket A, B, C, D • Bank Soal • Matriks Kunci & CBT
+              Randomizer Paket A, B, C, D • Kisi-Kisi • Upload Materi • Matriks Kunci
             </p>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center space-x-1 sm:space-x-2">
+        <div className="flex items-center space-x-1 sm:space-x-1.5">
           <button
             onClick={() => setActiveTab('generator')}
             className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5 ${
@@ -59,7 +64,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Sparkles className="w-4 h-4 text-indigo-300" />
-            <span>Generator Paket</span>
+            <span className="hidden sm:inline">Generator</span>
+            <span className="sm:hidden">Paket</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('kisikisi')}
+            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5 ${
+              activeTab === 'kisikisi'
+                ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400/30'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <FileCheck2 className="w-4 h-4 text-amber-300" />
+            <span>Kisi-Kisi</span>
           </button>
 
           <button
@@ -71,47 +89,55 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Database className="w-4 h-4 text-cyan-300" />
-            <span>Bank Soal</span>
-            <span className="ml-1 px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-slate-800 text-cyan-300 border border-slate-700">
+            <span className="hidden sm:inline">Bank Soal</span>
+            <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10.5px] font-bold bg-slate-800 text-cyan-300 border border-slate-700">
               {bankCount}
             </span>
           </button>
 
           <button
-            onClick={() => setActiveTab('student')}
-            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5 ${
-              activeTab === 'student'
-                ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400/30'
-                : 'text-slate-300 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            <GraduationCap className="w-4 h-4 text-emerald-400" />
-            <span className="hidden md:inline">Simulasi CBT</span>
-            <span className="md:hidden">CBT</span>
-          </button>
-
-          <button
             onClick={() => setActiveTab('matrix')}
-            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5 ${
+            className={`px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5 ${
               activeTab === 'matrix'
                 ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400/30'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800'
             }`}
             title="Matriks Kunci Jawaban Paket A, B, C, D"
           >
-            <FileSpreadsheet className="w-4 h-4 text-amber-300" />
+            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
             <span className="hidden lg:inline">Matriks Kunci</span>
           </button>
 
-          {/* Settings & Add Button */}
-          <div className="pl-1 sm:pl-2 border-l border-slate-700 flex items-center space-x-1.5">
+          <button
+            onClick={() => setActiveTab('student')}
+            className={`px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5 ${
+              activeTab === 'student'
+                ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400/30'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <GraduationCap className="w-4 h-4 text-purple-300" />
+            <span className="hidden md:inline">CBT</span>
+          </button>
+
+          {/* Quick Action Buttons */}
+          <div className="pl-1.5 border-l border-slate-700 flex items-center space-x-1.5">
+            <button
+              onClick={onOpenMaterialModal}
+              className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-teal-900/60 hover:bg-teal-800 text-teal-200 border border-teal-700/60 transition flex items-center space-x-1"
+              title="Upload Dokumen/Materi untuk digenerate menjadi butir soal"
+            >
+              <UploadCloud className="w-4 h-4 text-teal-300" />
+              <span className="hidden xl:inline">Upload Materi</span>
+            </button>
+
             <button
               onClick={onOpenHeaderModal}
               className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 transition flex items-center space-x-1"
               title="Kustomisasi Kop & Info Ujian"
             >
               <Settings2 className="w-4 h-4 text-slate-300" />
-              <span className="hidden xl:inline">Kop Ujian</span>
+              <span className="hidden 2xl:inline">Kop Ujian</span>
             </button>
 
             <button

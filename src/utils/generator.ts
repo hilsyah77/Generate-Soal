@@ -1,5 +1,9 @@
-import { Question, PackageQuestion, PackageKey, GeneratedPackages, GeneratorConfig, InformaticsElement } from '../types';
+import { Question, PackageQuestion, PackageKey, GeneratedPackages, GeneratorConfig } from '../types';
 
+/**
+ * Standard unbiased Fisher-Yates array shuffle.
+ * Returns a new shuffled copy without mutating the input array.
+ */
 export function shuffleArray<T>(array: T[]): T[] {
   const result = [...array];
   for (let i = result.length - 1; i > 0; i--) {
@@ -9,6 +13,14 @@ export function shuffleArray<T>(array: T[]): T[] {
   return result;
 }
 
+/**
+ * Generates parallel exam packages (A, B, C, D) from the question bank.
+ * Refined logic:
+ * 1. Filters by selected curriculum elements (if configured).
+ * 2. Samples a single master question pool so all packages evaluate the same core competencies.
+ * 3. Shuffles question order per package if shuffleQuestions is enabled.
+ * 4. Shuffles options (A-D) independently per package if shuffleOptions is enabled, accurately updating the answer key.
+ */
 export function generatePackages(
   questionBank: Question[],
   config: GeneratorConfig
@@ -17,31 +29,46 @@ export function generatePackages(
     return {};
   }
 
-  // Filter pool by selected elements if any
-  let pool = questionBank;
+  // 1. Filter pool by selected elements if any
+  let pool = [...questionBank];
   if (config.selectedElements && config.selectedElements.length > 0) {
-    pool = pool.filter((q) => config.selectedElements.includes(q.element));
+    const filtered = pool.filter((q) => config.selectedElements.includes(q.element));
+    if (filtered.length > 0) {
+      pool = filtered;
+    }
   }
 
-  // If filtered pool is empty, fallback to entire pool
-  if (pool.length === 0) {
-    pool = questionBank;
-  }
-
-  const generated: GeneratedPackages = {};
   const requestedCount = Math.min(config.questionCount, pool.length);
 
-  config.packages.forEach((pkgKey) => {
-    // Shuffle the available pool to pick random questions
-    let selectedQuestions = shuffleArray([...pool]).slice(0, requestedCount);
+  // 2. Select master question set for this exam run
+  // If pool has more questions than requested, sample a randomized subset
+  let masterQuestions: Question[] = [];
+  if (pool.length > requestedCount) {
+    masterQuestions = shuffleArray(pool).slice(0, requestedCount);
+  } else {
+    masterQuestions = [...pool];
+  }
 
-    // Optionally shuffle question display order
+  const letterMap: ('A' | 'B' | 'C' | 'D')[] = ['A', 'B', 'C', 'D'];
+  const generated: GeneratedPackages = {};
+
+  // 3. Generate each requested package
+  config.packages.forEach((pkgKey, pkgIndex) => {
+    let pkgQuestionsList = [...masterQuestions];
+
+    // Shuffle questions order for this package if enabled
     if (config.shuffleQuestions) {
-      selectedQuestions = shuffleArray(selectedQuestions);
+      if (pkgIndex === 0) {
+        // First package can be shuffled
+        pkgQuestionsList = shuffleArray(pkgQuestionsList);
+      } else {
+        // Subsequent packages get fresh distinct shuffles
+        pkgQuestionsList = shuffleArray(pkgQuestionsList);
+      }
     }
 
     // Process questions and option shuffling
-    const packageQuestions: PackageQuestion[] = selectedQuestions.map((q, index) => {
+    const packageQuestions: PackageQuestion[] = pkgQuestionsList.map((q, index) => {
       const originalOptions = [...q.options];
       const correctOptionText = originalOptions[q.correctIndex];
 
@@ -51,9 +78,11 @@ export function generatePackages(
       if (config.shuffleOptions) {
         finalOptions = shuffleArray(finalOptions);
         finalCorrectIndex = finalOptions.indexOf(correctOptionText);
+        if (finalCorrectIndex === -1) {
+          finalCorrectIndex = 0;
+        }
       }
 
-      const letterMap: ('A' | 'B' | 'C' | 'D')[] = ['A', 'B', 'C', 'D'];
       const correctLetter = letterMap[finalCorrectIndex] || 'A';
 
       return {
@@ -67,6 +96,8 @@ export function generatePackages(
         correctLetter,
         explanation: q.explanation,
         topic: q.topic,
+        cp: q.cp,
+        indicator: q.indicator,
       };
     });
 
@@ -87,7 +118,7 @@ export function formatTeacherText(
   text += `NASKAH SOAL PENILAIAN INFORMATIKA KELAS IX\n`;
   text += `SATUAN PENDIDIKAN: ${schoolName.toUpperCase()}\n`;
   text += `KURIKULUM: KURIKULUM MERDEKA\n`;
-  text += `KODE PAKET: PAKET ${pkgKey}\n`;
+  text += `KODE NASKAH: PAKET ${pkgKey}\n`;
   text += `JUMLAH SOAL: ${questions.length} BUTIR (PILIHAN GANDA)\n`;
   text += `===========================================================\n\n`;
 
