@@ -17,6 +17,14 @@ export interface KisiKisiItem {
 }
 
 export const DEFAULT_MATERI_CP: Record<string, string> = {
+  'BAB I: Berpikir Komputasional dalam Analisis Data': 'Peserta didik mampu menerapkan struktur data Tree dan Graph dalam pemodelan data serta menganalisis himpunan data terstruktur melalui teknik pengumpulan, pembersihan, eksplorasi, dan visualisasi data.',
+  'BAB I Berpikir Komputasional dalam Analisis Data': 'Peserta didik mampu menerapkan struktur data Tree dan Graph dalam pemodelan data serta menganalisis himpunan data terstruktur melalui teknik pengumpulan, pembersihan, eksplorasi, dan visualisasi data.',
+  'BAB II: Berpikir Komputasional dalam Algoritma dan Pemrograman': 'Peserta didik mampu mengembangkan dan memanfaatkan library dalam pemrograman visual blok serta menganalisis transisi dari pemrograman blok visual ke tekstual dan analisis pseudocode.',
+  'BAB II Berpikir Komputasional dalam Algoritma dan Pemrograman': 'Peserta didik mampu mengembangkan dan memanfaatkan library dalam pemrograman visual blok serta menganalisis transisi dari pemrograman blok visual ke tekstual dan analisis pseudocode.',
+  'BAB III: Literasi Digital untuk Produktivitas': 'Peserta didik mampu mengolah data menggunakan perkakas produktivitas yang tepat, mengintegrasikan konten data digital, serta merancang konten digital dengan bantuan kecerdasan artifisial (KA).',
+  'BAB III Literasi Digital untuk Produktivitas': 'Peserta didik mampu mengolah data menggunakan perkakas produktivitas yang tepat, mengintegrasikan konten data digital, serta merancang konten digital dengan bantuan kecerdasan artifisial (KA).',
+  'BAB IV: Keamanan Digital': 'Peserta didik mampu memahami klasifikasi data pribadi, mengidentifikasi ancaman serangan siber, menjaga keamanan jaringan nirkabel publik, menerapkan perlindungan data (password kuat, 2FA, enkripsi), serta menerapkan digital mindfulness.',
+  'BAB IV Keamanan Digital': 'Peserta didik mampu memahami klasifikasi data pribadi, mengidentifikasi ancaman serangan siber, menjaga keamanan jaringan nirkabel publik, menerapkan perlindungan data (password kuat, 2FA, enkripsi), serta menerapkan digital mindfulness.',
   'Berpikir Komputasional': 'Peserta didik mampu menerapkan berpikir komputasional untuk memecahkan persoalan komputasi dengan data bervolume besar, algoritma sorting/searching, serta struktur data Tree dan Graph.',
   'Teknologi Informasi & Komunikasi': 'Peserta didik mampu memanfaatkan integrasi aplikasi perkantoran, media kolaborasi daring, pengelolaan konten digital, dan otomatisasi dokumen terpadu.',
   'Sistem Komputer': 'Peserta didik mampu memahami cara kerja internal sistem komputer, fungsi CPU, memori, perangkat input-output, serta mekanisme sistem operasi.',

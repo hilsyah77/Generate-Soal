@@ -14,128 +14,386 @@ const ELEMENT_TO_MATERI: Record<InformaticsElement, string> = {
 
 export interface MaterialPreset {
   id: string;
+  babId: string;
+  babNumber: string;
+  babTitle: string;
+  subBabCode: string;
   title: string;
   element: InformaticsElement;
   level: CognitiveLevel;
   topic: string;
+  pages: string;
   summary: string;
 }
 
 export const INFORMATICS_GRADE9_PRESETS: MaterialPreset[] = [
+  // ==================== BAB I ====================
   {
-    id: 'preset-bk-tree-sorting',
-    title: '1. BK: Algoritma Sorting (Bubble & Selection) dan Struktur Data Tree/Graph',
+    id: 'preset-bab1-a-tree',
+    babId: 'bab-1',
+    babNumber: 'BAB I',
+    babTitle: 'Berpikir Komputasional dalam Analisis Data',
+    subBabCode: 'A',
+    title: 'BAB I - A. Struktur Data Tree (Pohon)',
+    element: 'BK',
+    level: 'MotS',
+    topic: 'Struktur Data Tree (Pohon)',
+    pages: 'Hal. 7 - 14',
+    summary: `BAB I: Berpikir Komputasional dalam Analisis Data
+Sub-Bab A: Struktur Data Tree (Pohon) (Hal. 7 - 14)
+
+1. Konsep Dasar Tree:
+   - Tree (Pohon) merupakan struktur data non-linear dan hirarkis yang merepresentasikan hubungan bertingkat (parent-child).
+   - Elemen Utama Tree:
+     * Root (Akar): Simpul paling atas yang tidak memiliki parent/induk.
+     * Node (Simpul): Tempat penyimpanan data atau informasi.
+     * Edge (Garis/Sisi): Penghubung antara simpul induk (parent) dengan simpul anak (child).
+     * Leaf (Daun): Simpul terminal yang tidak memiliki child/anak sama sekali.
+     * Height / Depth (Tingkat Kedalaman): Jumlah level atau tingkatan dari akar menuju daun terjauh.
+     * Subtree: Bagian cabang pohon yang membentuk struktur pohon tersendiri.
+
+2. Penerapan Nyata Struktur Data Tree:
+   - Sistem direktori berkas dan struktur folder pada sistem operasi komputer (misal C:\\Windows\\System32).
+   - Struktur Document Object Model (DOM) pada halaman web HTML (tag <html> -> <head>, <body> -> <div> -> <p>).
+   - Struktur organisasi institusi dan pohon silsilah keluarga (family tree).
+   - Pengindeksan basis data (B-Tree / Binary Search Tree) untuk mempercepat pencarian data bervolume besar.`,
+  },
+  {
+    id: 'preset-bab1-b-graph',
+    babId: 'bab-1',
+    babNumber: 'BAB I',
+    babTitle: 'Berpikir Komputasional dalam Analisis Data',
+    subBabCode: 'B',
+    title: 'BAB I - B. Struktur Data Graph (Graf)',
     element: 'BK',
     level: 'HoTS',
-    topic: 'Algoritma Pengurutan & Struktur Pohon',
-    summary: `Berpikir Komputasional mencakup dekomposisi, pengenalan pola, abstraksi, dan algoritma.
-1. Algoritma Pengurutan (Sorting):
-   - Bubble Sort bekerja dengan membandingkan pasangan elemen bersebelahan dan menukarnya jika urutannya salah, hingga elemen terbesar/terkecil 'mengapung' ke ujung. Kompleksitas terburuk O(n^2).
-   - Selection Sort bekerja dengan mencari nilai minimum dalam array yang belum terurut lalu menempatkannya di posisi awal iterasi.
-   - Insertion Sort menyisipkan elemen satu per satu ke posisi yang tepat pada bagian yang sudah terurut.
-2. Struktur Data Hirarkis & Jaringan:
-   - Tree (Pohon) adalah struktur data non-linier berakar (Root) dengan simpul anak (Children), simpul tanpa anak (Leaf/Daun), serta relasi Parent-Child. Digunakan pada struktur folder OS, DOM HTML, dan hierarki organisasi.
-   - Graph (Graf) terdiri dari kumpulan simpul (Vertex) dan garis sisi (Edge/Arc). Graf dapat berupa terarah (Directed) maupun tidak terarah (Undirected), serta berbobot (Weighted) untuk memodelkan jarak jalan raya atau rute jaringan internet.`,
+    topic: 'Struktur Data Graph (Graf)',
+    pages: 'Hal. 15 - 18',
+    summary: `BAB I: Berpikir Komputasional dalam Analisis Data
+Sub-Bab B: Struktur Data Graph (Graf) (Hal. 15 - 18)
+
+1. Konsep Dasar Graph:
+   - Graph adalah struktur data non-linear yang terdiri dari himpunan simpul/titik (Vertex/Node) dan himpunan garis penghubung (Edge/Arc).
+   - Berbeda dengan Tree, Graph tidak memiliki konsep hierarki tunggal (tidak harus memiliki root tunggal) dan dapat membentuk siklus (Cycle/Loop).
+
+2. Klasifikasi dan Jenis Graph:
+   - Undirected Graph (Graf Tidak Terarah): Relasi antar simpul berlaku dua arah tanpa panah arah (contoh: relasi pertemanan di media sosial).
+   - Directed Graph / Digraph (Graf Terarah): Garis penghubung memiliki anak panah dengan satu arah spesifik (contoh: alur lalu lintas jalan satu arah, relasi follower di Twitter/Instagram).
+   - Weighted Graph (Graf Berbobot): Setiap edge memiliki nilai/bobot (Weight) yang merepresentasikan jarak tempuh (km), biaya perjalanan (rupiah), atau waktu tempuh. Digunakan pada algoritma pencarian rute terpendek (seperti Google Maps / Dijkstra).
+
+3. Derajat Simpul (Degree):
+   - In-degree: Jumlah garis yang menuju/masuk ke dalam suatu simpul.
+   - Out-degree: Jumlah garis yang keluar dari suatu simpul menuju simpul lain.`,
   },
   {
-    id: 'preset-tik-office-collab',
-    title: '2. TIK: Integrasi Aplikasi Perkantoran & Otomatisasi Mail Merge',
-    element: 'TIK',
-    level: 'MotS',
-    topic: 'Integrasi Office & Otomatisasi Dokumen',
-    summary: `Teknologi Informasi dan Komunikasi (TIK) pada Fase D Kelas IX memfokuskan pada integrasi konten antar-aplikasi perkantoran:
-1. Fitur Mail Merge (Surat Massal) menghubungkan dokumen utama pengolah kata (Word Processor) dengan sumber data (Database / Spreadsheet) untuk mencetak ratusan surat atau sertifikat dengan data nama yang berbeda-beda secara otomatis.
-2. Object Linking and Embedding (OLE):
-   - Linking (Tautan): Data pada dokumen target akan otomatis terbarui secara real-time bila tabel pada lembar kerja sumber (Excel) diubah.
-   - Embedding (Penyematan): Objek tersimpan mandiri di dalam dokumen target tanpa terpengaruh perubahan file sumber.
-3. Media Kolaborasi Daring: Google Docs, Microsoft 365, fitur Commenting, Track Changes, dan hak akses (Viewer, Commenter, Editor) untuk penyusunan laporan bersama.`,
-  },
-  {
-    id: 'preset-sk-cpu-memory',
-    title: '3. SK: Arsitektur CPU, Siklus Mesin, dan Manajemen Memori',
-    element: 'SK',
-    level: 'MotS',
-    topic: 'Arsitektur Komputer & Siklus Fetch-Execute',
-    summary: `Sistem Komputer (SK) menjelaskan interaksi perangkat keras, perangkat lunak, dan pengguna:
-1. Central Processing Unit (CPU) terdiri atas:
-   - ALU (Arithmetic Logic Unit): Melakukan perhitungan aritmatika (+, -, *, /) dan operasi logika perbandingan (AND, OR, NOT, <, >).
-   - CU (Control Unit): Mengatur lalu lintas data dan instruksi, mengarahkan alur kerja seluruh komponen komputer.
-   - Register: Memori internal CPU berkecepatan paling tinggi untuk menyimpan data dan instruksi sementara yang sedang diproses.
-2. Siklus Instruksi (Machine Cycle): Terdiri dari tahap Fetch (mengambil instruksi dari RAM), Decode (menerjemahkan instruksi oleh CU), Execute (menjalankan operasi oleh ALU/komponen lain), dan Store (menyimpan hasil ke memori/register).
-3. Hierarki Memori: Register CPU -> Cache Memory (L1, L2, L3) -> RAM (Volatile) -> ROM (Non-Volatile/BIOS) -> Secondary Storage (SSD, HDD, NVMe).`,
-  },
-  {
-    id: 'preset-jki-cyber-routing',
-    title: '4. JKI: Topologi Jaringan, IP Addressing, Protokol, dan Keamanan Siber',
-    element: 'JKI',
-    level: 'HoTS',
-    topic: 'Jaringan Komputer, TCP/IP & Cyber Security',
-    summary: `Jaringan Komputer dan Internet (JKI):
-1. Topologi Jaringan:
-   - Topologi Star: Menggunakan konsentrator pusat (Switch/Hub). Jika satu kabel putus, node lain tetap beroperasi normal.
-   - Topologi Mesh: Setiap perangkat terhubung langsung ke perangkat lain (redundansi tinggi namun biaya kabel mahal).
-2. Protokol dan Pengalamatan:
-   - IPv4 terdiri dari 32 bit yang dibagi menjadi 4 oktet desimal (contoh: 192.168.1.1). IPv6 menggunakan 128 bit heksadesimal.
-   - DNS (Domain Name System) menerjemahkan nama domain yang mudah diingat manusia (www.kemdikbud.go.id) menjadi alamat IP server.
-   - HTTPS menggunakan enkripsi SSL/TLS melalui port default 443 untuk menjaga kerahasiaan transmisi data.
-3. Keamanan Siber:
-   - Phishing: Modus penipuan dengan membuat situs web palsu untuk mencuri kredensial sandi atau nomor rekening.
-   - Malware: Termasuk Ransomware (mengenkripsi file korban untuk minta tebusan), Trojan, dan Worm.
-   - Firewall: Memfilter paket data yang masuk dan keluar berdasarkan aturan keamanan jaringan yang ditentukan.`,
-  },
-  {
-    id: 'preset-ad-stats-visualization',
-    title: '5. AD: Pembersihan Data (Data Cleaning), Formula Logika, & Visualisasi',
+    id: 'preset-bab1-c-data-viz',
+    babId: 'bab-1',
+    babNumber: 'BAB I',
+    babTitle: 'Berpikir Komputasional dalam Analisis Data',
+    subBabCode: 'C',
+    title: 'BAB I - C. Analisis Himpunan Data Terstruktur dengan Teknik Visualisasi',
     element: 'AD',
+    level: 'HoTS',
+    topic: 'Tahapan Analisis & Visualisasi Data',
+    pages: 'Hal. 19 - 38',
+    summary: `BAB I: Berpikir Komputasional dalam Analisis Data
+Sub-Bab C: Analisis Himpunan Data Terstruktur dengan Teknik Visualisasi (Hal. 19 - 38)
+
+Tahapan Lengkap Siklus Analisis Data Terstruktur:
+1. Menentukan Tujuan Analisis Data (Hal. 20):
+   - Merumuskan pertanyaan penelitian dan tujuan akhir (misal: memprediksi tren konsumsi daya listrik sekolah atau kepuasan kantin).
+2. Mengumpulkan Data yang Diperlukan (Hal. 21):
+   - Mengumpulkan data primer (survei/kuesioner, formulir daring) dan data sekunder (arsip database, log server).
+3. Menyiapkan dan Membersihkan Data / Data Cleaning (Hal. 21):
+   - Menghapus data duplikat (Duplicate values).
+   - Mengisi atau mengeliminasi nilai kosong (Missing values / NULL).
+   - Memperbaiki inkonsistensi tipe format data (misal konversi format tanggal DD/MM/YYYY vs MM/DD/YYYY).
+4. Mengeksplorasi Data (Hal. 22):
+   - Menghitung ringkasan statistik deskriptif (Mean, Median, Modus, Nilai Minimum, Nilai Maksimum).
+   - Menemukan korelasi dan anomali/pencilan (Outlier) dalam dataset.
+5. Memvisualisasikan dan Memublikasikan Hasil Analisis Data (Hal. 23):
+   - Bar Chart (Diagram Batang): Membandingkan kuantitas antar kategori diskrit.
+   - Line Chart (Diagram Garis): Menampilkan fluktuasi perubahan tren dari waktu ke waktu (Time Series).
+   - Pie / Donut Chart: Menunjukkan proporsi persentase bagian terhadap keseluruhan (100%).
+   - Scatter Plot: Menganalisis relasi korelasi antara dua variabel kuantitatif.`,
+  },
+
+  // ==================== BAB II ====================
+  {
+    id: 'preset-bab2-a-block-library',
+    babId: 'bab-2',
+    babNumber: 'BAB II',
+    babTitle: 'Berpikir Komputasional dalam Algoritma dan Pemrograman',
+    subBabCode: 'A',
+    title: 'BAB II - A. Mengembangkan Library dalam Pemrograman Visual Blok',
+    element: 'AP',
     level: 'MotS',
-    topic: 'Analisis Data, Pembersihan & Grafik',
-    summary: `Analisis Data (AD) mencakup siklus hidup data: Pengumpulan -> Pembersihan -> Analisis -> Interpretasi -> Visualisasi.
-1. Pembersihan Data (Data Cleaning):
-   - Menghapus data duplikat (Duplicates), menangani nilai yang hilang (Missing Values/NULL), memperbaiki inkonsistensi format tipe data (misal format tanggal atau teks numerik).
-2. Formula Spreadsheet Tingkat Lanjut:
-   - VLOOKUP(lookup_value, table_array, col_index, [range_lookup]): Mencari nilai pada kolom paling kiri tabel dan mengambil nilai sebaris pada kolom yang ditentukan.
-   - COUNTIF & SUMIF: Menghitung frekuensi atau menjumlahkan sel berdasarkan kriteria kondisi tertentu.
-   - Logika IF Bertingkat (Nested IF): Menguji beberapa kondisi keputusan bersyarat.
-3. Visualisasi Data:
-   - Bar / Column Chart: Membandingkan kategori diskrit.
-   - Line Chart: Menampilkan tren perubahan data terhadap waktu (Time Series).
-   - Pie / Donut Chart: Menunjukkan proporsi bagian terhadap keseluruhan (100%).
-   - Scatter Plot: Menunjukkan korelasi antara dua variabel kuantitatif.`,
+    topic: 'Modularisasi & Library Pemrograman Visual Blok',
+    pages: 'Hal. 42 - 75',
+    summary: `BAB II: Berpikir Komputasional dalam Algoritma dan Pemrograman
+Sub-Bab A: Mengembangkan Library dalam Pemrograman Visual Blok (Hal. 42 - 75)
+
+1. Modularisasi Program (Hal. 43):
+   - Memecah masalah program yang kompleks dan panjang menjadi modul-modul kecil (subprogram/fungsi/prosedur) yang mandiri.
+   - Manfaat Modularisasi:
+     * Meningkatkan keterbacaan kode (readability).
+     * Memudahkan proses pelacakan kesalahan (debugging & testing).
+     * Menerapkan prinsip DRY (Don't Repeat Yourself) sehingga blok fungsi dapat dipakai berulang kali tanpa membuat ulang dari awal.
+2. Konsep Library (Hal. 64):
+   - Library adalah kumpulan modul subprogram, fungsi, dan variabel siap pakai yang telah diuji dan dikemas untuk mempermudah pembuatan aplikasi baru.
+   - Pada platform pemrograman visual blok (seperti Scratch / Blockly / MakeCode), pembuatan blok khusus dilakukan melalui fitur "My Blocks" (Membuat Blok Sendiri dengan parameter input angka, teks, atau boolean).
+3. Penggunaan Library (Hal. 66):
+   - Mengimpor dan mengintegrasikan ekstensi library luar (misal library fisika gravitasi, pemutar suara/musik synth, sensor webcam kecerdasan buatan, atau antarmuka perangkat keras micro:bit).
+   - Memanggil blok fungsi dengan passing parameter yang sesuai.`,
   },
   {
-    id: 'preset-ap-python-logic',
-    title: '6. AP: Pemrograman Prosedural Python (Variabel, Kondisional, & Loop)',
+    id: 'preset-bab2-b-visual-vs-textual',
+    babId: 'bab-2',
+    babNumber: 'BAB II',
+    babTitle: 'Berpikir Komputasional dalam Algoritma dan Pemrograman',
+    subBabCode: 'B',
+    title: 'BAB II - B. Pemrograman Visual Blok vs Pemrograman Tekstual',
     element: 'AP',
     level: 'HoTS',
-    topic: 'Algoritma & Pemrograman Python',
-    summary: `Algoritma dan Pemrograman (AP) melatih logika instruksi terstruktur:
-1. Variabel dan Tipe Data:
-   - Integer (bilangan bulat), Float (desimal), String (teks), Boolean (True / False), List (koleksi berurutan dapat diubah).
-2. Struktur Kontrol Keputusan (Branching):
-   - if condition: ... elif condition: ... else: ...
-   - Operator perbandingan (==, !=, >, <, >=, <=) dan operator logika (and, or, not).
-3. Struktur Perulangan (Iteration):
-   - for i in range(start, stop, step): Perulangan dengan jumlah iterasi terhitung (Definite Loop).
-   - while condition: Perulangan berdasarkan kebenaran kondisi logika (Indefinite Loop).
-4. Fungsi dan Modularisasi:
-   - Mendefinisikan subprogram dengan kata kunci 'def nama_fungsi(parameter):' dan mengembalikan nilai dengan 'return'. Mencegah penulisan kode berulang (DRY - Don't Repeat Yourself).`,
+    topic: 'Transisi Blok Visual ke Tekstual & Pseudocode',
+    pages: 'Hal. 76 - 114',
+    summary: `BAB II: Berpikir Komputasional dalam Algoritma dan Pemrograman
+Sub-Bab B: Pemrograman Visual Blok vs Pemrograman Tekstual (Hal. 76 - 114)
+
+1. Transisi dari Pemrograman Visual Blok ke Pemrograman Tekstual (Hal. 76):
+   - Pemrograman Visual Blok (Drag & Drop): Mencegah kesalahan ketik sintaksis (syntax error), sangat baik untuk pemula memahami logika percabangan dan perulangan.
+   - Pemrograman Tekstual (Python / C / JavaScript): Menuliskan instruksi kode baris demi baris menggunakan aturan tata bahasa (sintaks, tanda kurung, titik koma, serta indentasi blok kode).
+   - Pemetaan Konsep Blok ke Python:
+     * Blok "set [var] to [10]" -> var = 10
+     * Blok "if <kondisi> then ... else ..." -> if condition:\n   ...\nelse:\n   ...
+     * Blok "repeat [5]" -> for i in range(5):
+     * Blok "repeat until <kondisi>" -> while not (condition):
+2. Analisis Pseudocode (Hal. 106):
+   - Pseudocode adalah notasi deskriptif algoritma yang menyerupai bahasa pemrograman tetapi tidak terikat pada sintaks bahasa tertentu dan mudah dipahami manusia.
+   - Struktur Pseudocode terdiri atas: Bagian Judul (Header), Bagian Deklarasi (Variabel & Tipe Data), dan Bagian Deskripsi/Algoritma (instruksi berurutan).
+   - Menelusuri (Tracing) nilai variabel pada setiap langkah eksekusi pseudocode untuk menentukan output akhir program secara tepat.`,
+  },
+
+  // ==================== BAB III ====================
+  {
+    id: 'preset-bab3-a-data-processing',
+    babId: 'bab-3',
+    babNumber: 'BAB III',
+    babTitle: 'Literasi Digital untuk Produktivitas',
+    subBabCode: 'A',
+    title: 'BAB III - A. Pemrosesan Data',
+    element: 'TIK',
+    level: 'MotS',
+    topic: 'Permasalahan & Perkakas Pemrosesan Data',
+    pages: 'Hal. 119 - 129',
+    summary: `BAB III: Literasi Digital untuk Produktivitas
+Sub-Bab A: Pemrosesan Data (Hal. 119 - 129)
+
+1. Permasalahan Dasar Pemrosesan Data (Hal. 122):
+   - Volume Data Besar: Kesulitan mengolah ribuan baris data secara manual dengan mata telanjang.
+   - Human Error (Kesalahan Manusia): Typo pengetikan nilai angka atau formula.
+   - Redundansi dan Inkonsistensi: Data yang tersimpan ganda di lokasi berbeda dengan nilai yang saling bertentangan.
+   - Format yang Tidak Seragam: Pencampuran penulisan teks mata uang ('Rp 50.000' vs '50000').
+2. Dampak Penggunaan Perkakas yang Baik dan Benar (Hal. 125):
+   - Efisiensi Waktu: Mengotomatiskan perhitungan berulang menggunakan fungsi spreadsheet (SUM, AVERAGE, COUNTIF, VLOOKUP/XLOOKUP).
+   - Validasi Input (Data Validation): Membatasi jenis input pada sel spreadsheet (misal hanya angka 1-100 atau daftar dropdown) guna mencegah kesalahan input.
+   - Integritas dan Keamanan Data: Menjaga keaslian arsip data dan melindungi data dari manipulasi tidak sah.`,
   },
   {
-    id: 'preset-dsi-privacy-law',
-    title: '7. DSI: Hak Kekayaan Intelektual (HAKI), Perlindungan Data Pribadi, & UU ITE',
+    id: 'preset-bab3-b-data-presentation',
+    babId: 'bab-3',
+    babNumber: 'BAB III',
+    babTitle: 'Literasi Digital untuk Produktivitas',
+    subBabCode: 'B',
+    title: 'BAB III - B. Penyajian Data & Integrasi Konten',
+    element: 'TIK',
+    level: 'MotS',
+    topic: 'Format Data, Aplikasi Produktivitas & Integrasi Konten',
+    pages: 'Hal. 130 - 169',
+    summary: `BAB III: Literasi Digital untuk Produktivitas
+Sub-Bab B: Penyajian Data (Hal. 130 - 169)
+
+1. Jenis dan Format Data (Hal. 130):
+   - Tipe Data: Text/String, Integer, Float, Date/Time, Boolean (True/False).
+   - Format Berkas Data: CSV (Comma Separated Values), XLSX (Spreadsheet Excel), JSON (JavaScript Object Notation), PDF (Portable Document Format).
+2. Perangkat Lunak Produktivitas (Hal. 150):
+   - Pengolah Kata (Word Processor): Penyusunan laporan, naskah, makalah formal.
+   - Pengolah Angka (Spreadsheet): Pemodelan data numerik, formula, kalkulasi statistik.
+   - Presentasi (Slide Presentation): Komunikasi visual gagasan dengan layout menarik.
+   - Perkakas Kolaborasi Daring: Fitur share file, realtime co-authoring, pemberian komentar dan riwayat revisi (version control).
+3. Integrasi Data Konten (Hal. 164):
+   - Mail Merge (Surat Massal): Menggabungkan template dokumen utama dengan tabel data penerima secara dinamis.
+   - Object Linking and Embedding (OLE):
+     * Object Linking: Objek pada dokumen target terhubung langsung dengan file sumber (grafik otomatis terupdate jika data spreadsheet sumber diubah).
+     * Object Embedding: Objek disematkan secara utuh ke dalam dokumen tanpa terhubung ke file luar.`,
+  },
+  {
+    id: 'preset-bab3-c-content-design-ai',
+    babId: 'bab-3',
+    babNumber: 'BAB III',
+    babTitle: 'Literasi Digital untuk Produktivitas',
+    subBabCode: 'C',
+    title: 'BAB III - C. Perancangan Konten & Kecerdasan Artifisial (KA)',
+    element: 'TIK',
+    level: 'HoTS',
+    topic: 'Strategi Konten & Pemanfaatan AI (Kecerdasan Artifisial)',
+    pages: 'Hal. 170 - 180',
+    summary: `BAB III: Literasi Digital untuk Produktivitas
+Sub-Bab C: Perancangan Konten (Hal. 170 - 180)
+
+1. Strategi Perancangan Konten Digital (Hal. 171):
+   - Penentuan Target Audiens dan Tujuan Pesan (edukasi, persuasi, atau informasi).
+   - Prinsip Desain Visual: Keselarasan (Harmony), Kontras Warna, Hierarki Tipografi (Ukuran Judul, Subjudul, Teks Tubuh), dan Keseimbangan Ruang Negatif (Whitespace).
+   - Etika Konten: Menghargai Hak Cipta (Copyright), mencantumkan atribusi sumber, dan mematuhi lisensi Creative Commons (CC).
+2. Perancangan Konten Menggunakan Kecerdasan Artifisial (KA / Artificial Intelligence) (Hal. 174):
+   - Penerapan Generative AI (KA Generatif) untuk membantu penyusunan draf teks, pembuatan visual ilustrasi, perbaikan tata bahasa, dan penerjemahan otomatis.
+   - Prompt Engineering: Teknik merumuskan instruksi teks yang spesifik, kontekstual, jelas, dan memuat batasan kriteria agar respon KA akurat dan berkualitas.
+   - Kesadaran Kritis & Verifikasi Fakta (Fact-Checking): Waspada terhadap halusinasi AI (informasi karangan tidak nyata) serta tidak memasukkan data rahasia pribadi ke prompt publik.`,
+  },
+
+  // ==================== BAB IV ====================
+  {
+    id: 'preset-bab4-a-info-types',
+    babId: 'bab-4',
+    babNumber: 'BAB IV',
+    babTitle: 'Keamanan Digital',
+    subBabCode: 'A',
+    title: 'BAB IV - A. Jenis Informasi (Data Pribadi Umum & Spesifik)',
     element: 'DSI',
     level: 'LotS',
-    topic: 'Etika Digital, HAKI, & Hukum Siber',
-    summary: `Dampak Sosial Informatika (DSI):
-1. Hak Kekayaan Intelektual (HAKI) dan Lisensi:
-   - Hak Cipta melindungi karya orisinal (perangkat lunak, gambar, buku, audio).
-   - Lisensi Open Source (GPL, MIT, Apache): Mengizinkan modifikasi dan distribusi ulang kode secara terbuka.
-   - Creative Commons (CC): Mengatur hak pakai materi digital (Attribution/BY, Non-Commercial/NC, Share-Alike/SA).
-2. Perlindungan Data Pribadi (UU PDP):
-   - Data pribadi spesifik (biometrik, riwayat kesehatan, data anak, catatan keuangan) memerlukan perlindungan ekstra.
-   - Jejak Digital (Digital Footprint): Jejak aktif (unggahan media sosial) dan jejak pasif (riwayat penelusuran IP, cookies).
-3. Undang-Undang ITE (Informasi dan Transaksi Elektronik):
-   - Mengatur larangan penyebaran konten hoaks/fitnah, akses ilegal (hacking), manipulasi dokumen elektronik, dan penipuan online.`,
+    topic: 'Klasifikasi Data Pribadi (Umum & Spesifik)',
+    pages: 'Hal. 185 - 193',
+    summary: `BAB IV: Keamanan Digital
+Sub-Bab A: Jenis Informasi (Hal. 185 - 193)
+
+Menurut Undang-Undang Perlindungan Data Pribadi (UU PDP):
+1. Data Pribadi Umum (Hal. 187):
+   - Data yang bersifat umum dan tidak langsung membahayakan keselamatan kritis jika diketahui pihak lain, meliputi:
+     * Nama Lengkap
+     * Jenis Kelamin
+     * Kewarganegaraan
+     * Agama
+     * Status Perkawinan
+     * Data pribadi yang dikombinasikan untuk mengidentifikasi seseorang.
+2. Data Pribadi Spesifik / Sensitif (Hal. 187):
+   - Data yang memiliki tingkat kerahasiaan tinggi dan jika bocor dapat menimbulkan diskriminasi atau kerugian fatal bagi pemiliknya:
+     * Data dan Rekam Medis Kesehatan.
+     * Data Biometrik (Sidik Jari, Pengenalan Wajah/Face ID, Retina Mata).
+     * Data Genetika.
+     * Catatan Kejahatan / Hukum.
+     * Data Anak di bawah umur.
+     * Data Keuangan Pribadi (Nomor Rekening, Nomor Kartu Kredit, PIN ATM, Kode CVV).`,
+  },
+  {
+    id: 'preset-bab4-b-cyber-attacks',
+    babId: 'bab-4',
+    babNumber: 'BAB IV',
+    babTitle: 'Keamanan Digital',
+    subBabCode: 'B',
+    title: 'BAB IV - B. Serangan Siber & Penanganannya',
+    element: 'DSI',
+    level: 'HoTS',
+    topic: 'Jenis Serangan Siber & Mitigasi Penanganan',
+    pages: 'Hal. 194 - 208',
+    summary: `BAB IV: Keamanan Digital
+Sub-Bab B: Serangan Siber (Hal. 194 - 208)
+
+1. Jenis-Jenis Serangan Siber (Hal. 194):
+   - Phishing: Modus rekayasa sosial (Social Engineering) dengan mengirimkan email/link website palsu yang meniru instansi resmi guna menjebak korban memberikan sandi akun.
+   - Malware (Malicious Software):
+     * Ransomware: Mengenkripsi seluruh berkas file pengguna lalu memeras uang tebusan.
+     * Trojan: Perangkat lunak jahat yang menyamar sebagai aplikasi legal/game gratis.
+     * Spyware / Keylogger: Memantau dan merekam seluruh ketikan keyboard diam-diam.
+   - Denial of Service (DoS / DDoS): Membanjiri lalu lintas server target dengan ribuan permintaan palsu hingga layanan tumbang dan tidak dapat diakses.
+2. Dampak Pada Teknologi Modern (Hal. 202):
+   - Pencurian identitas digital, kebocoran basis data massal, kerugian finansial, dan hilangnya kepercayaan publik terhadap platform digital.
+3. Penanganan dan Mitigasi Serangan (Hal. 203):
+   - Memutus koneksi perangkat terinfeksi dari jaringan (Isolasi).
+   - Memulihkan data dari cadangan berkas (Backup) bersih berkala (prinsip 3-2-1 Backup).
+   - Melaporkan insiden siber ke tim keamanan (CSIRT / BSSN) dan mengganti seluruh kredensial akun.`,
+  },
+  {
+    id: 'preset-bab4-c-public-wifi',
+    babId: 'bab-4',
+    babNumber: 'BAB IV',
+    babTitle: 'Keamanan Digital',
+    subBabCode: 'C',
+    title: 'BAB IV - C. Keamanan Jaringan Nirkabel di Ruang Publik',
+    element: 'JKI',
+    level: 'HoTS',
+    topic: 'Keamanan Wi-Fi Publik & Risiko Pengiriman Data',
+    pages: 'Hal. 209 - 214',
+    summary: `BAB IV: Keamanan Digital
+Sub-Bab C: Keamanan Jaringan Nirkabel di Ruang Publik (Hal. 209 - 214)
+
+1. Karakteristik Jaringan Nirkabel (Wi-Fi) Publik (Hal. 209):
+   - Gelombang radio Wi-Fi memancar bebas di udara tanpa kabel fisik sehingga paket data dapat ditangkap oleh siapa saja di radius jangkauan.
+   - Hotspot gratis di kafe/bandara sering kali tidak menggunakan enkripsi kata sandi (Open Network).
+2. Dampak Pengabaian Keamanan Jaringan (Hal. 210):
+   - Risiko intersepsi data oleh peretas yang berada di jaringan nirkabel yang sama.
+3. Risiko Pengiriman Data di Jaringan Publik (Hal. 211):
+   - Eavesdropping / Packet Sniffing: Pelaku menggunakan aplikasi sniffer untuk menyadap lalu lintas transmisi data yang tidak terenkripsi.
+   - Man-in-the-Middle (MitM) Attack: Penyerang menyusup di antara perangkat korban dengan router untuk membaca atau mengubah paket data secara realtime.
+   - Rogue AP / Evil Twin: Pembuatan hotspot tiruan dengan nama SSID identik untuk menjebak korban terhubung ke router palsu milik peretas.
+   - Solusi Pengamanan: Selalu gunakan protokol aman HTTPS, aktifkan VPN (Virtual Private Network), dan hindari login akun perbankan di Wi-Fi publik.`,
+  },
+  {
+    id: 'preset-bab4-d-data-protection',
+    babId: 'bab-4',
+    babNumber: 'BAB IV',
+    babTitle: 'Keamanan Digital',
+    subBabCode: 'D',
+    title: 'BAB IV - D. Perlindungan Data Pribadi',
+    element: 'DSI',
+    level: 'MotS',
+    topic: 'Password Kuat, 2FA, Enkripsi, & Update Software',
+    pages: 'Hal. 215 - 224',
+    summary: `BAB IV: Keamanan Digital
+Sub-Bab D: Perlindungan Data Pribadi (Hal. 215 - 224)
+
+Empat Pilar Perlindungan Data Pribadi:
+1. Kata Sandi yang Kuat (Strong Password) (Hal. 215):
+   - Minimal 12 karakter atau lebih.
+   - Kombinasi huruf besar (A-Z), huruf kecil (a-z), angka (0-9), dan simbol khusus (@, #, $, %, !).
+   - Hindari data mudah ditebak (tanggal lahir, nama hewan peliharaan, '123456', 'password').
+   - Gunakan password yang berbeda untuk setiap akun dan manfaatkan Password Manager.
+2. Autentikasi Dua Faktor (Two-Factor Authentication / 2FA / MFA) (Hal. 217):
+   - Menambahkan lapisan proteksi ganda:
+     * Sesuatu yang Anda ketahui (Password / PIN).
+     * Sesuatu yang Anda miliki (Kode OTP SMS, Google Authenticator, Kunci Keamanan Fisik).
+     * Sesuatu yang melekat pada Anda (Biometrik Sidik Jari / Face ID).
+3. Enkripsi dan Dekripsi (Hal. 218):
+   - Enkripsi (Encryption): Mengubah teks asli yang dapat dibaca (Plaintext) menjadi teks acak tersandi rahasia (Ciphertext) menggunakan kunci kriptografi.
+   - Dekripsi (Decryption): Mengembalikan Ciphertext menjadi Plaintext dengan kunci yang sah.
+4. Update Software Rutin (Hal. 222):
+   - Pembaruan sistem operasi dan aplikasi berfungsi menambal lubang kerentanan keamanan (Security Patch/Vulnerability) agar tidak dieksploitasi oleh malware baru.`,
+  },
+  {
+    id: 'preset-bab4-e-digital-mindfulness',
+    babId: 'bab-4',
+    babNumber: 'BAB IV',
+    babTitle: 'Keamanan Digital',
+    subBabCode: 'E',
+    title: 'BAB IV - E. Perilaku dan Kesadaran Penuh (Mindfulness) pada Dunia Digital',
+    element: 'DSI',
+    level: 'MotS',
+    topic: 'Etika Perilaku Digital, Mindfulness & Pola Hidup Sehat',
+    pages: 'Hal. 225 - 240',
+    summary: `BAB IV: Keamanan Digital
+Sub-Bab E: Perilaku dan Kesadaran Penuh (Mindfulness) pada Dunia Digital (Hal. 225 - 240)
+
+1. Perilaku Digital (Netiket) (Hal. 226):
+   - Menerapkan etika berkomunikasi santun di ruang maya (Netiquette).
+   - Menjaga jejak digital (Digital Footprint) positif yang tidak merugikan masa depan.
+   - Menghindari perilaku Cyberbullying (perundungan siber), Doxxing (menyebarkan data pribadi orang lain tanpa izin), dan penyebaran berita bohong (Hoax).
+2. Mindfulness Dunia Digital (Kesadaran Penuh) (Hal. 229):
+   - Kesadaran diri secara utuh saat berinteraksi dengan gawai teknologi.
+   - Mengendalikan sindrom FOMO (Fear of Missing Out / kecemasan berlebih jika tertinggal tren di media sosial).
+   - Membatasi waktu layar (Screen Time Management) dan menyaring informasi secara kritis sebelum membagikan (Share).
+3. Pola Hidup Sehat Mendukung Kesehatan Mental (Hal. 235):
+   - Menjaga postur tubuh ergonomis saat menggunakan laptop/komputer dan menerapkan aturan 20-20-20 untuk relaksasi mata.
+   - Menyeimbangkan kehidupan daring dengan aktivitas sosial fisik di dunia nyata.
+   - Melakukan detoks digital berkala untuk mencegah kelelahan mental (Digital Burnout).`,
   },
 ];
 
@@ -447,7 +705,9 @@ export function generateQuestionsFromMaterial(
       indicator = `Disajikan proyek komputasi fisik PLB, peserta didik dapat menjelaskan peranan sensor input.`;
     }
 
-    const materiName = ELEMENT_TO_MATERI[element] || 'Umum';
+    const materiName = topicName?.startsWith('BAB')
+      ? topicName.split(' - ')[0]
+      : (ELEMENT_TO_MATERI[element] || 'Informatika');
 
     questions.push({
       id: `${generatedIdPrefix}_${i + 1}`,
@@ -459,7 +719,7 @@ export function generateQuestionsFromMaterial(
       correctIndex,
       explanation,
       topic: detectedTopic,
-      cp: DEFAULT_MATERI_CP[materiName] || 'Peserta didik mampu memahami dan mengaplikasikan materi informatika secara komprehensif.',
+      cp: DEFAULT_MATERI_CP[materiName] || DEFAULT_MATERI_CP[ELEMENT_TO_MATERI[element]] || 'Peserta didik mampu memahami dan mengaplikasikan materi informatika secara komprehensif.',
       indicator,
     });
   }

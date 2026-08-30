@@ -3,6 +3,7 @@ import {
   InformaticsElement,
   Question,
   ELEMENT_LABELS,
+  GRADE9_TEXTBOOK_CHAPTERS,
 } from '../types';
 import {
   INFORMATICS_GRADE9_PRESETS,
@@ -23,6 +24,10 @@ import {
   Cpu,
   Layers,
   ArrowRight,
+  FolderOpen,
+  FileCode,
+  ShieldCheck,
+  Search,
 } from 'lucide-react';
 
 interface MaterialUploadModalProps {
@@ -38,6 +43,7 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
   onAddQuestionsToBank,
   onToast,
 }) => {
+  const [selectedBabFilter, setSelectedBabFilter] = useState<string>('ALL');
   const [selectedElement, setSelectedElement] = useState<InformaticsElement>('BK');
   const [targetLevel, setTargetLevel] = useState<'Balanced' | 'LotS' | 'MotS' | 'HoTS'>('Balanced');
   const [questionCount, setQuestionCount] = useState<number>(5);
@@ -51,12 +57,18 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Filter presets based on selected Bab tab
+  const filteredPresets = selectedBabFilter === 'ALL'
+    ? INFORMATICS_GRADE9_PRESETS
+    : INFORMATICS_GRADE9_PRESETS.filter((p) => p.babId === selectedBabFilter);
+
   // Handle Preset selection
   const handleSelectPreset = (preset: MaterialPreset) => {
     setSelectedElement(preset.element);
-    setTopicTitle(preset.topic);
+    setTopicTitle(preset.title);
     setMaterialContent(preset.summary);
-    setFileName(`Preset: ${preset.title}`);
+    setFileName(`Preset Buku: ${preset.title} (${preset.pages})`);
+    onToast(`Memuat materi "${preset.title}" (${preset.pages})`, 'info');
   };
 
   // Handle File Upload (txt, json, docx text, csv, etc.)
@@ -100,7 +112,7 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
   // Generate Questions handler
   const handleGenerate = () => {
     if (!materialContent.trim()) {
-      onToast('Harap unggah file dokumen atau tempel ringkasan materi terlebih dahulu!', 'error');
+      onToast('Harap pilih preset bab atau tempel ringkasan materi terlebih dahulu!', 'error');
       return;
     }
 
@@ -153,19 +165,19 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
         <div className="bg-slate-900 text-white px-6 py-4.5 flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md">
-              <Sparkles className="w-5 h-5" />
+              <BookOpen className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h2 className="text-base sm:text-lg font-bold text-white leading-tight">
-                  Upload Materi & Generator Soal Otomatis
+                  Preset Materi SMP Kelas IX & Generator Soal
                 </h2>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  AI & NLP Engine
+                  Sesuai Daftar Isi Buku
                 </span>
               </div>
               <p className="text-xs text-slate-300">
-                Unggah modul ajar, rangkuman bab, atau materi bacaan untuk digenerate menjadi butir soal pilihan ganda (A-D)
+                Pilih topik sesuai BAB I s.d. BAB IV Buku Informatika Kelas IX atau unggah modul ajar Anda sendiri.
               </p>
             </div>
           </div>
@@ -181,52 +193,97 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-6 flex-grow">
           {generatedPreview.length === 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               
-              {/* Left Column: Preset Materi Kurikulum Merdeka */}
-              <div className="lg:col-span-1 space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <div className="flex items-center space-x-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
-                  <BookOpen className="w-4 h-4 text-indigo-600" />
-                  <span>Preset Materi SMP Kelas IX:</span>
+              {/* Left Column: Preset Materi Kurikulum Merdeka (5 cols) */}
+              <div className="lg:col-span-5 space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                    <BookOpen className="w-4 h-4 text-indigo-600" />
+                    <span>Daftar Isi SMP Kelas IX</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-slate-500 bg-white px-2 py-0.5 rounded-full border border-slate-200">
+                    Buku Resmi
+                  </span>
                 </div>
-                <p className="text-[11px] text-slate-500">
-                  Pilih cepat materi standar Kurikulum Merdeka Fase D berikut:
-                </p>
 
-                <div className="space-y-1.5 max-h-[360px] overflow-y-auto pr-1">
-                  {INFORMATICS_GRADE9_PRESETS.map((preset) => {
+                {/* Chapter filter pills */}
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedBabFilter('ALL')}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
+                      selectedBabFilter === 'ALL'
+                        ? 'bg-slate-900 text-white shadow-xs'
+                        : 'bg-white text-slate-600 hover:bg-slate-200 border border-slate-200'
+                    }`}
+                  >
+                    Semua Bab
+                  </button>
+                  {GRADE9_TEXTBOOK_CHAPTERS.map((ch) => (
+                    <button
+                      key={ch.id}
+                      type="button"
+                      onClick={() => setSelectedBabFilter(ch.id)}
+                      className={`px-2 py-1 rounded-lg text-[11px] font-bold transition ${
+                        selectedBabFilter === ch.id
+                          ? 'bg-indigo-600 text-white shadow-xs'
+                          : 'bg-white text-slate-600 hover:bg-indigo-50 border border-slate-200'
+                      }`}
+                      title={ch.fullTitle}
+                    >
+                      {ch.babNumber}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Preset List Container */}
+                <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1 flex-grow">
+                  {filteredPresets.map((preset) => {
                     const elem = ELEMENT_LABELS[preset.element];
+                    const isSelected = topicTitle === preset.title;
                     return (
-                      <button
+                      <div
                         key={preset.id}
-                        type="button"
                         onClick={() => handleSelectPreset(preset)}
-                        className="w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50/50 transition text-xs group"
+                        className={`w-full text-left p-3 rounded-xl border transition cursor-pointer group ${
+                          isSelected
+                            ? 'border-indigo-600 bg-indigo-50/80 shadow-xs'
+                            : 'border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/30'
+                        }`}
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${elem.badgeBg}`}>
-                            {elem.short}
+                          <span className="text-[10px] font-bold text-indigo-700 bg-indigo-100/70 px-1.5 py-0.5 rounded">
+                            {preset.babNumber} - Sub-Bab {preset.subBabCode}
                           </span>
-                          <span className="text-[9px] font-bold text-slate-400 group-hover:text-indigo-600">
-                            {preset.level}
+                          <span className="text-[10px] font-medium text-slate-500">
+                            {preset.pages}
                           </span>
                         </div>
-                        <p className="font-bold text-slate-800 leading-snug group-hover:text-indigo-900">
-                          {preset.title}
+                        <p className="font-bold text-slate-900 text-xs leading-snug group-hover:text-indigo-900">
+                          {preset.title.replace(/^BAB\s+[IVX]+\s*-\s*/, '')}
                         </p>
-                      </button>
+                        <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100">
+                          <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${elem.badgeBg}`}>
+                            {elem.short} - {elem.full}
+                          </span>
+                          <span className="text-[9px] font-bold text-slate-500">
+                            Level: {preset.level}
+                          </span>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Middle/Right Column: Upload, Text Area, & Config */}
-              <div className="lg:col-span-2 space-y-4">
+              {/* Middle/Right Column: Upload, Text Area, & Config (7 cols) */}
+              <div className="lg:col-span-7 space-y-4">
                 
                 {/* File Upload Box */}
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50/70 hover:bg-indigo-50/30 rounded-2xl p-4 text-center cursor-pointer transition flex flex-col items-center justify-center space-y-2"
+                  className="border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50/70 hover:bg-indigo-50/30 rounded-2xl p-3.5 text-center cursor-pointer transition flex flex-col items-center justify-center space-y-1.5"
                 >
                   <input
                     ref={fileInputRef}
@@ -235,15 +292,15 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
                     onChange={handleFileUpload}
                     className="hidden"
                   />
-                  <div className="p-2.5 rounded-full bg-indigo-100 text-indigo-700">
-                    <UploadCloud className="w-5 h-5" />
+                  <div className="p-2 rounded-full bg-indigo-100 text-indigo-700">
+                    <UploadCloud className="w-4 h-4" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-800">
-                      {fileName ? `File Terpilih: ${fileName}` : 'Klik untuk Unggah File Materi / Modul'}
+                      {fileName ? `File Terpilih: ${fileName}` : 'Atau Unggah Modul Ajar / File Mandiri (.TXT / .JSON / .CSV)'}
                     </p>
                     <p className="text-[11px] text-slate-500">
-                      Mendukung format Dokumen .TXT, .MD, .CSV, .JSON (atau langsung ketik/tempel di bawah)
+                      Dapat menggunakan materi dari preset buku di sebelah kiri atau mengunggah catatan sendiri
                     </p>
                   </div>
                 </div>
@@ -285,7 +342,7 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Jumlah Butir Soal (Maks. 50):
+                      Jumlah Butir Soal:
                     </label>
                     <input
                       type="number"
@@ -305,10 +362,10 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
                   </label>
                   <input
                     type="text"
-                    placeholder="Contoh: Algoritma Sorting, Jaringan Nirkabel, Etika Digital..."
+                    placeholder="Pilih dari preset di samping atau ketik topik bab..."
                     value={topicTitle}
                     onChange={(e) => setTopicTitle(e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 bg-white"
+                    className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 bg-white"
                   />
                 </div>
 
@@ -316,7 +373,7 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-xs font-bold text-slate-700">
-                      Isi Ringkasan Materi / Bahan Bacaan:
+                      Rangkuman Materi / Pokok Pembahasan Buku:
                     </label>
                     <span className="text-[11px] text-slate-400">
                       {materialContent.length} karakter
@@ -324,7 +381,7 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
                   </div>
                   <textarea
                     rows={6}
-                    placeholder="Tempelkan ringkasan materi, modul ajar, atau poin-poin pembelajaran di sini..."
+                    placeholder="Pilih preset materi dari daftar isi atau tempelkan ringkasan modul di sini..."
                     value={materialContent}
                     onChange={(e) => setMaterialContent(e.target.value)}
                     className="w-full rounded-xl border border-slate-300 p-3 text-xs text-slate-800 font-sans leading-relaxed focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
@@ -347,7 +404,7 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
                     <span>
                       {isGenerating
                         ? 'Sedang Memproses Materi & Meracik Soal...'
-                        : `Generate ${questionCount} Soal Dari Materi Ini`}
+                        : `Generate ${questionCount} Soal Dari Bab Ini`}
                     </span>
                   </button>
                 </div>
@@ -376,7 +433,7 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
                     onClick={() => setGeneratedPreview([])}
                     className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-100 transition"
                   >
-                    Kembali Edit Materi
+                    Kembali Pilih Bab / Edit Materi
                   </button>
 
                   <button
@@ -410,6 +467,11 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-700">
                             {q.level}
                           </span>
+                          {q.materi && (
+                            <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                              {q.materi}
+                            </span>
+                          )}
                           {q.topic && (
                             <span className="text-[10px] text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
                               {q.topic}
@@ -474,7 +536,7 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
         {/* Modal Footer */}
         <div className="bg-slate-50 px-6 py-3.5 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
           <div>
-            Format sesuai standar <strong>Kurikulum Merdeka Fase D (SMP Kelas IX)</strong>
+            Daftar Isi Standar Buku <strong>Informatika SMP Kelas IX (Kurikulum Merdeka)</strong>
           </div>
           <button
             onClick={onClose}
