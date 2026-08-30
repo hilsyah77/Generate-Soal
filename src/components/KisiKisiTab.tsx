@@ -4,28 +4,23 @@ import {
   PackageQuestion,
   GeneratedPackages,
   ExamHeaderConfig,
-  InformaticsElement,
   CognitiveLevel,
-  ELEMENT_LABELS,
   COGNITIVE_LABELS,
+  getMateriBadgeStyle,
   PackageKey,
 } from '../types';
 import {
   buildKisiKisiList,
   exportKisiKisiCSV,
-  KisiKisiItem,
 } from '../utils/kisikisiHelper';
 import {
   FileSpreadsheet,
   Printer,
   Download,
   Copy,
-  Filter,
-  CheckCircle2,
-  BookOpen,
-  Layers,
-  Sparkles,
   Search,
+  BookOpen,
+  Lightbulb,
 } from 'lucide-react';
 import { copyToClipboard } from '../utils/generator';
 
@@ -43,18 +38,17 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
   packages,
   headerConfig,
   onToast,
-  onNavigateToGenerator,
-  onOpenHeaderModal,
 }) => {
   // Available packages
   const activePackageKeys = Object.keys(packages) as PackageKey[];
   const [selectedSource, setSelectedSource] = useState<string>(
     activePackageKeys.length > 0 ? `pkg_${activePackageKeys[0]}` : 'bank'
   );
-  const [selectedElementFilter, setSelectedElementFilter] = useState<InformaticsElement | 'ALL'>('ALL');
+  const [selectedMateriFilter, setSelectedMateriFilter] = useState<string>('ALL');
   const [selectedLevelFilter, setSelectedLevelFilter] = useState<CognitiveLevel | 'ALL'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [showKeys, setShowKeys] = useState(true);
+  const [showExplanation, setShowExplanation] = useState(false);
 
   // Extract source questions
   const sourceQuestions: (Question | PackageQuestion)[] = useMemo(() => {
@@ -74,10 +68,31 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
     return buildKisiKisiList(sourceQuestions, packageLetter);
   }, [sourceQuestions, packageLetter]);
 
+  // Statistics
+  const materiDistribution = useMemo(() => {
+    const counts: Record<string, number> = {};
+    allKisiItems.forEach((it) => {
+      counts[it.materi] = (counts[it.materi] || 0) + 1;
+    });
+    return counts;
+  }, [allKisiItems]);
+
+  // List of materis that actually exist in the current source
+  const availableMaterisInSource = useMemo(() => {
+    return Object.keys(materiDistribution);
+  }, [materiDistribution]);
+
+  // Auto-reset materi filter if the selected materi does not exist in the newly selected source
+  useEffect(() => {
+    if (selectedMateriFilter !== 'ALL' && !materiDistribution[selectedMateriFilter]) {
+      setSelectedMateriFilter('ALL');
+    }
+  }, [selectedSource, materiDistribution, selectedMateriFilter]);
+
   // Filtered items
   const filteredItems = useMemo(() => {
     return allKisiItems.filter((item) => {
-      if (selectedElementFilter !== 'ALL' && item.element !== selectedElementFilter) {
+      if (selectedMateriFilter !== 'ALL' && item.materi !== selectedMateriFilter) {
         return false;
       }
       if (selectedLevelFilter !== 'ALL' && item.level !== selectedLevelFilter) {
@@ -85,38 +100,16 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
       }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
+        const matchMateri = item.materi.toLowerCase().includes(q);
         const matchTopic = item.topic.toLowerCase().includes(q);
         const matchIndicator = item.indicator.toLowerCase().includes(q);
         const matchStem = item.stemPreview.toLowerCase().includes(q);
-        const matchElement = item.elementName.toLowerCase().includes(q);
-        if (!matchTopic && !matchIndicator && !matchStem && !matchElement) return false;
+        const matchExplanation = (item.explanation || '').toLowerCase().includes(q);
+        if (!matchMateri && !matchTopic && !matchIndicator && !matchStem && !matchExplanation) return false;
       }
       return true;
     });
-  }, [allKisiItems, selectedElementFilter, selectedLevelFilter, searchQuery]);
-
-  // Statistics
-  const elementDistribution = useMemo(() => {
-    const counts: Partial<Record<InformaticsElement, number>> = {};
-    allKisiItems.forEach((it) => {
-      counts[it.element] = (counts[it.element] || 0) + 1;
-    });
-    return counts;
-  }, [allKisiItems]);
-
-  // List of elements that actually exist in the current source
-  const availableElementsInSource = useMemo(() => {
-    return (Object.keys(ELEMENT_LABELS) as InformaticsElement[]).filter(
-      (elem) => (elementDistribution[elem] || 0) > 0
-    );
-  }, [elementDistribution]);
-
-  // Auto-reset element filter if the selected element does not exist in the newly selected source
-  useEffect(() => {
-    if (selectedElementFilter !== 'ALL' && !elementDistribution[selectedElementFilter]) {
-      setSelectedElementFilter('ALL');
-    }
-  }, [selectedSource, elementDistribution, selectedElementFilter]);
+  }, [allKisiItems, selectedMateriFilter, selectedLevelFilter, searchQuery]);
 
   const levelDistribution = useMemo(() => {
     let lots = 0;
@@ -137,12 +130,12 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
 
   const handleExportCSV = () => {
     exportKisiKisiCSV(allKisiItems, headerConfig, packageLetter);
-    onToast('Kisi-kisi berhasil diekspor ke file CSV/Excel!', 'success');
+    onToast('Kisi-kisi dan pembahasan berhasil diekspor ke file CSV/Excel!', 'success');
   };
 
   const handleCopyText = async () => {
     let text = `===========================================================\n`;
-    text += `KISI-KISI PENULISAN SOAL ASESMEN INFORMATIKA KELAS IX\n`;
+    text += `KISI-KISI & PEMBAHASAN ASESMEN INFORMATIKA KELAS IX\n`;
     text += `SATUAN PENDIDIKAN : ${headerConfig.schoolName.toUpperCase()}\n`;
     text += `MATA PELAJARAN    : ${headerConfig.subject.toUpperCase()}\n`;
     text += `KELAS / SEMESTER  : ${headerConfig.gradeLevel} / ${headerConfig.semester}\n`;
@@ -152,17 +145,20 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
     text += `===========================================================\n\n`;
 
     allKisiItems.forEach((it) => {
-      text += `[No. ${it.no}] Elemen: ${it.elementName} (${it.level})\n`;
-      text += `Materi Pokok   : ${it.topic}\n`;
+      text += `[No. ${it.no}] Materi: ${it.materi} (${it.level})\n`;
+      text += `Sub-Materi     : ${it.topic}\n`;
       text += `Capaian Pemb.  : ${it.cp}\n`;
       text += `Indikator Soal : ${it.indicator}\n`;
       text += `Bentuk / No    : ${it.form} - Nomor ${it.questionNumber} (Kunci: ${it.correctLetter || '-'})\n`;
+      if (it.explanation) {
+        text += `Pembahasan     : ${it.explanation}\n`;
+      }
       text += `-----------------------------------------------------------\n`;
     });
 
     const ok = await copyToClipboard(text);
     if (ok) {
-      onToast('Format kisi-kisi dinas berhasil disalin ke clipboard!', 'success');
+      onToast('Format kisi-kisi dan pembahasan berhasil disalin ke clipboard!', 'success');
     }
   };
 
@@ -172,20 +168,20 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 no-print">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">
+            <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200">
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                  Kisi-Kisi Penulisan Soal Asesmen
+                  Kisi-Kisi & Matriks Pembahasan Soal
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800">
                   Kurikulum Merdeka
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                Matriks spesifikasi Capaian Pembelajaran, materi pokok, indikator soal, dan sebaran kognitif
+                Matriks materi pokok, sub-materi, capaian pembelajaran, indikator soal, dan pembahasan
               </p>
             </div>
           </div>
@@ -195,7 +191,7 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
             <button
               onClick={handleCopyText}
               className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center space-x-1.5"
-              title="Salin Rangkuman Teks Kisi-Kisi"
+              title="Salin Rangkuman Teks Kisi-Kisi & Pembahasan"
             >
               <Copy className="w-3.5 h-3.5 text-slate-600" />
               <span>Salin Teks</span>
@@ -215,7 +211,7 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
               className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition flex items-center space-x-1.5"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Cetak / PDF Kisi-Kisi</span>
+              <span>Cetak / PDF Dokumen</span>
             </button>
           </div>
         </div>
@@ -241,25 +237,25 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
             </select>
           </div>
 
-          {/* 2. Filter Elemen (Menyesuaikan Sumber Kisi-Kisi) */}
+          {/* 2. Filter Materi (Menyesuaikan Sumber Kisi-Kisi) */}
           <div>
             <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
-              <span>Filter Elemen:</span>
+              <span>Filter Materi:</span>
               <span className="text-[10px] text-indigo-600 normal-case font-semibold">
-                {availableElementsInSource.length} Elemen Aktif
+                {availableMaterisInSource.length} Materi Aktif
               </span>
             </label>
             <select
-              value={selectedElementFilter}
-              onChange={(e) => setSelectedElementFilter(e.target.value as any)}
+              value={selectedMateriFilter}
+              onChange={(e) => setSelectedMateriFilter(e.target.value)}
               className="w-full rounded-xl border-slate-300 border px-3 py-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50"
             >
               <option value="ALL">
-                Semua Elemen di {packageLetter ? `Paket ${packageLetter}` : 'Bank'} ({allKisiItems.length} Soal)
+                Semua Materi di {packageLetter ? `Paket ${packageLetter}` : 'Bank'} ({allKisiItems.length} Soal)
               </option>
-              {availableElementsInSource.map((elem) => (
-                <option key={elem} value={elem}>
-                  {elem} - {ELEMENT_LABELS[elem].short} ({elementDistribution[elem] || 0} Soal)
+              {availableMaterisInSource.map((mat) => (
+                <option key={mat} value={mat}>
+                  {mat} ({materiDistribution[mat] || 0} Soal)
                 </option>
               ))}
             </select>
@@ -285,7 +281,7 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
           {/* 4. Pencarian Cepat */}
           <div>
             <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
-              Cari Topik / Indikator:
+              Cari Materi / Pembahasan:
             </label>
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -300,18 +296,18 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
           </div>
         </div>
 
-        {/* Dynamic Source-Adaptive Element Filter Chips */}
+        {/* Dynamic Source-Adaptive Materi Filter Chips */}
         <div className="mt-3.5 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-1.5">
           <span className="text-[11px] font-bold text-slate-500 mr-1 flex items-center space-x-1">
-            <span>Elemen {packageLetter ? `Paket ${packageLetter}` : 'Bank Master'}:</span>
+            <span>Materi {packageLetter ? `Paket ${packageLetter}` : 'Bank Master'}:</span>
           </span>
 
           {/* All Button */}
           <button
             type="button"
-            onClick={() => setSelectedElementFilter('ALL')}
+            onClick={() => setSelectedMateriFilter('ALL')}
             className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
-              selectedElementFilter === 'ALL'
+              selectedMateriFilter === 'ALL'
                 ? 'bg-indigo-600 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
@@ -319,32 +315,32 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
             <span>Semua</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
-                selectedElementFilter === 'ALL' ? 'bg-indigo-800 text-white' : 'bg-slate-200 text-slate-700'
+                selectedMateriFilter === 'ALL' ? 'bg-indigo-800 text-white' : 'bg-slate-200 text-slate-700'
               }`}
             >
               {allKisiItems.length}
             </span>
           </button>
 
-          {/* Individual Element Buttons Present in this Source */}
-          {availableElementsInSource.map((elem) => {
-            const isSelected = selectedElementFilter === elem;
-            const count = elementDistribution[elem] || 0;
-            const info = ELEMENT_LABELS[elem];
+          {/* Individual Materi Buttons Present in this Source */}
+          {availableMaterisInSource.map((mat) => {
+            const isSelected = selectedMateriFilter === mat;
+            const count = materiDistribution[mat] || 0;
+            const badge = getMateriBadgeStyle(mat);
 
             return (
               <button
-                key={elem}
+                key={mat}
                 type="button"
-                onClick={() => setSelectedElementFilter(elem)}
+                onClick={() => setSelectedMateriFilter(mat)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 border ${
                   isSelected
                     ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs ring-1 ring-indigo-400'
-                    : `${info.badgeBg} hover:opacity-90`
+                    : `${badge.bg} ${badge.text} ${badge.border} hover:opacity-90`
                 }`}
-                title={`Filter hanya elemen ${info.full} (${count} butir soal)`}
+                title={`Filter hanya materi ${mat} (${count} butir soal)`}
               >
-                <span>{elem}</span>
+                <span>{mat}</span>
                 <span
                   className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
                     isSelected ? 'bg-indigo-800 text-white' : 'bg-white/90 text-slate-800 border border-slate-200/60'
@@ -356,10 +352,10 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
             );
           })}
 
-          {selectedElementFilter !== 'ALL' && (
+          {selectedMateriFilter !== 'ALL' && (
             <button
               type="button"
-              onClick={() => setSelectedElementFilter('ALL')}
+              onClick={() => setSelectedMateriFilter('ALL')}
               className="text-[11px] text-rose-600 hover:text-rose-800 font-bold ml-1 transition underline"
             >
               Reset Filter
@@ -367,7 +363,7 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
           )}
         </div>
 
-        {/* Cognitive & Element Badges Summary */}
+        {/* Toggle options & Cognitive Summary */}
         <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
           <div className="flex items-center space-x-2">
             <span className="text-slate-500 font-semibold text-[11px]">Komposisi Kognitif:</span>
@@ -382,15 +378,25 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <label className="flex items-center space-x-1.5 text-slate-600 font-medium cursor-pointer text-xs">
+          <div className="flex items-center space-x-4">
+            <label className="flex items-center space-x-1.5 text-slate-700 font-medium cursor-pointer text-xs">
               <input
                 type="checkbox"
                 checked={showKeys}
                 onChange={(e) => setShowKeys(e.target.checked)}
-                className="rounded border-slate-300 text-indigo-600"
+                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
               />
               <span>Tampilkan Kolom Kunci</span>
+            </label>
+
+            <label className="flex items-center space-x-1.5 text-slate-700 font-medium cursor-pointer text-xs">
+              <input
+                type="checkbox"
+                checked={showExplanation}
+                onChange={(e) => setShowExplanation(e.target.checked)}
+                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <span>Tampilkan Kolom Pembahasan</span>
             </label>
           </div>
         </div>
@@ -455,23 +461,26 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
             <thead>
               <tr className="bg-slate-100 text-slate-900 font-extrabold uppercase text-[11px] tracking-tight">
                 <th className="border border-slate-300 px-2.5 py-2.5 text-center w-10">No.</th>
-                <th className="border border-slate-300 px-3 py-2.5 w-36">Elemen Capaian</th>
-                <th className="border border-slate-300 px-3 py-2.5 w-44">Materi Pokok</th>
-                <th className="border border-slate-300 px-3 py-2.5 min-w-[200px]">Capaian Pembelajaran (CP)</th>
-                <th className="border border-slate-300 px-3 py-2.5 min-w-[230px]">Indikator Soal</th>
-                <th className="border border-slate-300 px-2.5 py-2.5 text-center w-24">Level</th>
-                <th className="border border-slate-300 px-2 py-2.5 text-center w-16">Bentuk</th>
+                <th className="border border-slate-300 px-3 py-2.5 w-44">Materi Pembelajaran</th>
+                <th className="border border-slate-300 px-3 py-2.5 w-40">Sub-Materi / Topik</th>
+                <th className="border border-slate-300 px-3 py-2.5 min-w-[180px]">Capaian Pembelajaran (CP)</th>
+                <th className="border border-slate-300 px-3 py-2.5 min-w-[200px]">Indikator Soal</th>
+                <th className="border border-slate-300 px-2.5 py-2.5 text-center w-20">Level</th>
+                <th className="border border-slate-300 px-2 py-2.5 text-center w-14">Bentuk</th>
                 <th className="border border-slate-300 px-2 py-2.5 text-center w-14">No Soal</th>
                 {showKeys && (
                   <th className="border border-slate-300 px-2 py-2.5 text-center w-14 no-print">Kunci</th>
+                )}
+                {showExplanation && (
+                  <th className="border border-slate-300 px-3 py-2.5 min-w-[200px] no-print">Pembahasan</th>
                 )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
               {filteredItems.length > 0 ? (
                 filteredItems.map((item, idx) => {
-                  const elemInfo = ELEMENT_LABELS[item.element];
-                  const cogInfo = COGNITIVE_LABELS[item.level];
+                  const badge = getMateriBadgeStyle(item.materi);
+                  const cogInfo = COGNITIVE_LABELS[item.level] || COGNITIVE_LABELS.MotS;
 
                   return (
                     <tr
@@ -482,12 +491,9 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
                         {item.no}
                       </td>
                       <td className="border border-slate-300 px-2.5 py-2 font-semibold">
-                        <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold border ${elemInfo?.badgeBg || 'bg-slate-100'}`}>
-                          {item.element}
+                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${badge.bg} ${badge.text} ${badge.border}`}>
+                          {item.materi}
                         </span>
-                        <div className="text-[10px] text-slate-600 mt-0.5 leading-tight font-medium">
-                          {elemInfo?.full || item.elementName}
-                        </div>
                       </td>
                       <td className="border border-slate-300 px-2.5 py-2 font-bold text-slate-900 leading-snug">
                         {item.topic}
@@ -514,13 +520,18 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
                           {item.correctLetter || '-'}
                         </td>
                       )}
+                      {showExplanation && (
+                        <td className="border border-slate-300 px-2.5 py-2 text-slate-700 text-[11px] leading-relaxed no-print">
+                          {item.explanation || '-'}
+                        </td>
+                      )}
                     </tr>
                   );
                 })
               ) : (
                 <tr>
                   <td
-                    colSpan={showKeys ? 9 : 8}
+                    colSpan={8 + (showKeys ? 1 : 0) + (showExplanation ? 1 : 0)}
                     className="border border-slate-300 px-4 py-8 text-center text-slate-500 italic"
                   >
                     Tidak ada butir kisi-kisi yang cocok dengan kriteria filter.

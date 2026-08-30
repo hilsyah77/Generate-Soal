@@ -18,7 +18,7 @@ import { SchoolHeaderModal, defaultExamHeader } from './components/SchoolHeaderM
 import { MaterialUploadModal } from './components/MaterialUploadModal';
 import { ToastContainer, ToastMessage } from './components/Toast';
 
-const STORAGE_KEY_BANK = 'smp_informatics_grade9_bank_v3';
+const STORAGE_KEY_BANK = 'smp_informatics_grade9_bank_v4';
 const STORAGE_KEY_HEADER = 'smp_informatics_grade9_header_v2';
 
 export default function App() {
@@ -146,9 +146,9 @@ export default function App() {
   };
 
   const handleResetDefault = () => {
-    if (window.confirm('Kembalikan seluruh bank soal ke standar 25+ soal Kurikulum Merdeka default?')) {
+    if (window.confirm('Kembalikan seluruh bank soal ke standar 400 butir soal (50 butir per materi) Kurikulum Merdeka default?')) {
       setQuestionBank(DEFAULT_QUESTIONS);
-      showToast('Bank soal berhasil dikembalikan ke standar default!', 'info');
+      showToast('Bank soal berhasil dikembalikan ke standar default (400 butir)!', 'info');
     }
   };
 

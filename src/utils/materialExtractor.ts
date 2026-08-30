@@ -1,5 +1,16 @@
 import { Question, InformaticsElement, CognitiveLevel } from '../types';
-import { ELEMENT_DEFAULT_CP } from './kisikisiHelper';
+import { DEFAULT_MATERI_CP } from './kisikisiHelper';
+
+const ELEMENT_TO_MATERI: Record<InformaticsElement, string> = {
+  BK: 'Berpikir Komputasional',
+  TIK: 'Teknologi Informasi & Komunikasi',
+  SK: 'Sistem Komputer',
+  JKI: 'Jaringan Komputer & Internet',
+  AD: 'Analisis Data',
+  AP: 'Algoritma & Pemrograman',
+  DSI: 'Dampak Sosial Informatika',
+  PLB: 'Praktik Lintas Bidang',
+};
 
 export interface MaterialPreset {
   id: string;
@@ -436,16 +447,19 @@ export function generateQuestionsFromMaterial(
       indicator = `Disajikan proyek komputasi fisik PLB, peserta didik dapat menjelaskan peranan sensor input.`;
     }
 
+    const materiName = ELEMENT_TO_MATERI[element] || 'Umum';
+
     questions.push({
       id: `${generatedIdPrefix}_${i + 1}`,
       element,
+      materi: materiName,
       level,
       stem,
       options,
       correctIndex,
       explanation,
       topic: detectedTopic,
-      cp: ELEMENT_DEFAULT_CP[element],
+      cp: DEFAULT_MATERI_CP[materiName] || 'Peserta didik mampu memahami dan mengaplikasikan materi informatika secara komprehensif.',
       indicator,
     });
   }

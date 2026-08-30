@@ -4,21 +4,22 @@ export type InformaticsElement = 'BK' | 'TIK' | 'SK' | 'JKI' | 'AD' | 'AP' | 'DS
 
 export interface Question {
   id: string;
-  element: InformaticsElement;
+  materi: string; // Materi / Pokok Bahasan Utama
   level: CognitiveLevel;
   stem: string;
   options: [string, string, string, string]; // 4 choices (A, B, C, D)
   correctIndex: number; // 0, 1, 2, 3
-  explanation: string;
-  topic?: string;
-  cp?: string;
-  indicator?: string;
+  explanation: string; // Pembahasan Soal Lengkap
+  topic?: string; // Sub-topik / bahasan spesifik (opsional)
+  element?: InformaticsElement; // Kompatibilitas elemen kurikulum
+  cp?: string; // Capaian Pembelajaran
+  indicator?: string; // Indikator Soal
 }
 
 export interface PackageQuestion {
   num: number;
   id: string;
-  element: InformaticsElement;
+  materi: string;
   level: CognitiveLevel;
   stem: string;
   options: string[];
@@ -26,6 +27,7 @@ export interface PackageQuestion {
   correctLetter: 'A' | 'B' | 'C' | 'D';
   explanation: string;
   topic?: string;
+  element?: InformaticsElement;
   cp?: string;
   indicator?: string;
 }
@@ -52,8 +54,20 @@ export interface GeneratorConfig {
   packages: PackageKey[];
   shuffleOptions: boolean;
   shuffleQuestions: boolean;
-  selectedElements: InformaticsElement[];
+  selectedMateris: string[]; // Filter berdasarkan Materi Pembahasan
+  selectedElements?: InformaticsElement[];
 }
+
+export const SUGGESTED_MATERI = [
+  'Berpikir Komputasional',
+  'Algoritma & Pemrograman',
+  'Sistem Komputer',
+  'Jaringan Komputer & Internet',
+  'Analisis Data',
+  'Dampak Sosial Informatika',
+  'Teknologi Informasi & Komunikasi',
+  'Praktik Lintas Bidang',
+];
 
 export const ELEMENT_LABELS: Record<InformaticsElement, { short: string; full: string; color: string; badgeBg: string }> = {
   BK: {
@@ -105,6 +119,36 @@ export const ELEMENT_LABELS: Record<InformaticsElement, { short: string; full: s
     badgeBg: 'bg-teal-50 text-teal-700 border-teal-200',
   },
 };
+
+// Helper to get styling for any custom or standard materi name
+export function getMateriBadgeStyle(materiName: string): { bg: string; text: string; border: string } {
+  const m = materiName.toLowerCase();
+  if (m.includes('algoritma') || m.includes('pemrograman') || m.includes('coding') || m.includes('python')) {
+    return { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' };
+  }
+  if (m.includes('berpikir') || m.includes('komputasional') || m.includes('logika')) {
+    return { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' };
+  }
+  if (m.includes('jaringan') || m.includes('internet') || m.includes('ip') || m.includes('router')) {
+    return { bg: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200' };
+  }
+  if (m.includes('sistem') || m.includes('hardware') || m.includes('cpu') || m.includes('memori')) {
+    return { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' };
+  }
+  if (m.includes('data') || m.includes('analisis') || m.includes('statistik') || m.includes('chart')) {
+    return { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' };
+  }
+  if (m.includes('sosial') || m.includes('etika') || m.includes('hukum') || m.includes('keamanan')) {
+    return { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' };
+  }
+  if (m.includes('tik') || m.includes('aplikasi') || m.includes('perkantoran') || m.includes('office')) {
+    return { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' };
+  }
+  if (m.includes('praktik') || m.includes('lintas') || m.includes('proyek') || m.includes('design')) {
+    return { bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-200' };
+  }
+  return { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-300' };
+}
 
 export const COGNITIVE_LABELS: Record<CognitiveLevel, { label: string; desc: string; badge: string }> = {
   LotS: {

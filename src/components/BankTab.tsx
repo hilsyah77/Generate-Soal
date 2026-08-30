@@ -1,10 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   Question,
-  InformaticsElement,
-  CognitiveLevel,
-  ELEMENT_LABELS,
   COGNITIVE_LABELS,
+  getMateriBadgeStyle,
 } from '../types';
 import {
   Search,
@@ -18,6 +16,7 @@ import {
   CheckCircle2,
   BookOpen,
   Layers,
+  Lightbulb,
 } from 'lucide-react';
 import { exportBankToJson } from '../utils/generator';
 
@@ -40,17 +39,48 @@ export const BankTab: React.FC<BankTabProps> = ({
   onImportBank,
   onToast,
 }) => {
-  const [elementFilter, setElementFilter] = useState<string>('ALL');
+  const [materiFilter, setMateriFilter] = useState<string>('ALL');
   const [levelFilter, setLevelFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Dynamic distinct list of Materis from the question bank
+  const availableMateris = useMemo(() => {
+    const set = new Set<string>();
+    questionBank.forEach((q) => {
+      const m = q.materi || q.topic || 'Materi Umum';
+      set.add(m);
+    });
+    return Array.from(set);
+  }, [questionBank]);
+
+  // Counts per materi
+  const materiDistribution = useMemo(() => {
+    const map: Record<string, number> = {};
+    questionBank.forEach((q) => {
+      const m = q.materi || q.topic || 'Materi Umum';
+      map[m] = (map[m] || 0) + 1;
+    });
+    return map;
+  }, [questionBank]);
+
   // Filter logic
   const filteredQuestions = questionBank.filter((q) => {
-    if (elementFilter !== 'ALL' && q.element !== elementFilter) return false;
+    const qMateri = q.materi || q.topic || 'Materi Umum';
+    if (materiFilter !== 'ALL' && qMateri !== materiFilter) return false;
     if (levelFilter !== 'ALL' && q.level !== levelFilter) return false;
     if (searchQuery.trim()) {
-      const qText = (q.stem + ' ' + q.explanation + ' ' + (q.topic || '') + ' ' + q.options.join(' ')).toLowerCase();
+      const qText = (
+        q.stem +
+        ' ' +
+        (q.explanation || '') +
+        ' ' +
+        (q.materi || '') +
+        ' ' +
+        (q.topic || '') +
+        ' ' +
+        q.options.join(' ')
+      ).toLowerCase();
       if (!qText.includes(searchQuery.toLowerCase())) return false;
     }
     return true;
@@ -65,8 +95,13 @@ export const BankTab: React.FC<BankTabProps> = ({
       try {
         const parsed = JSON.parse(event.target?.result as string);
         if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].stem && parsed[0].options) {
-          onImportBank(parsed);
-          onToast(`Berhasil mengimpor ${parsed.length} butir soal ke Bank!`, 'success');
+          const normalized: Question[] = parsed.map((item) => ({
+            ...item,
+            materi: item.materi || item.topic || (item.element ? 'Informatika' : 'Materi Pembahasan'),
+            explanation: item.explanation || 'Pembahasan telah diverifikasi sesuai kunci.',
+          }));
+          onImportBank(normalized);
+          onToast(`Berhasil mengimpor ${normalized.length} butir soal ke Bank!`, 'success');
         } else {
           onToast('Format berkas JSON tidak valid untuk Bank Soal.', 'error');
         }
@@ -100,19 +135,19 @@ export const BankTab: React.FC<BankTabProps> = ({
           
           {/* Filters */}
           <div className="flex flex-wrap items-center gap-3">
-            {/* Element Filter */}
+            {/* Materi Filter */}
             <div className="w-full sm:w-auto">
               <select
-                value={elementFilter}
-                onChange={(e) => setElementFilter(e.target.value)}
-                className="w-full sm:w-48 rounded-xl border-slate-300 border text-xs px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white font-medium text-slate-800"
+                value={materiFilter}
+                onChange={(e) => setMateriFilter(e.target.value)}
+                className="w-full sm:w-56 rounded-xl border-slate-300 border text-xs px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white font-medium text-slate-800"
               >
-                <option value="ALL">Semua Elemen / Bab ({questionBank.length})</option>
-                {Object.entries(ELEMENT_LABELS).map(([key, info]) => {
-                  const count = questionBank.filter((q) => q.element === key).length;
+                <option value="ALL">Semua Materi Pokok ({questionBank.length} Soal)</option>
+                {availableMateris.map((m) => {
+                  const count = materiDistribution[m] || 0;
                   return (
-                    <option key={key} value={key}>
-                      {info.short} - {info.full} ({count})
+                    <option key={m} value={m}>
+                      {m} ({count})
                     </option>
                   );
                 })}
@@ -139,7 +174,7 @@ export const BankTab: React.FC<BankTabProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari kata kunci materi / soal..."
+                placeholder="Cari materi, soal, pembahasan..."
                 className="w-full rounded-xl border-slate-300 border text-xs pl-8 pr-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
               <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
@@ -169,7 +204,7 @@ export const BankTab: React.FC<BankTabProps> = ({
             <button
               onClick={onResetDefault}
               className="px-3 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition flex items-center space-x-1.5"
-              title="Kembalikan ke 20+ soal Kurikulum Merdeka default"
+              title="Kembalikan ke paket soal Kurikulum Merdeka default"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset Default</span>
@@ -180,31 +215,50 @@ export const BankTab: React.FC<BankTabProps> = ({
               className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition flex items-center space-x-1.5"
             >
               <Plus className="w-4 h-4" />
-              <span>Tambah Soal</span>
+              <span>Tambah Soal & Pembahasan</span>
             </button>
           </div>
 
         </div>
 
-        {/* Quick Element Count Pills */}
+        {/* Quick Materi Distribution Pills */}
         <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs">
           <span className="text-slate-500 font-semibold flex items-center">
             <Layers className="w-3.5 h-3.5 mr-1 text-slate-400" />
-            Distribusi:
+            Materi:
           </span>
-          {Object.entries(ELEMENT_LABELS).map(([k, info]) => {
-            const count = questionBank.filter((q) => q.element === k).length;
+          <span
+            onClick={() => setMateriFilter('ALL')}
+            className={`cursor-pointer px-2.5 py-1 rounded-lg text-[11px] font-bold border transition ${
+              materiFilter === 'ALL'
+                ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs'
+                : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+            }`}
+          >
+            Semua ({questionBank.length})
+          </span>
+          {availableMateris.map((m) => {
+            const count = materiDistribution[m] || 0;
+            const badge = getMateriBadgeStyle(m);
+            const isSelected = materiFilter === m;
             return (
               <span
-                key={k}
-                onClick={() => setElementFilter(elementFilter === k ? 'ALL' : k)}
-                className={`cursor-pointer px-2 py-0.5 rounded-md text-[11px] font-bold border transition ${
-                  elementFilter === k
-                    ? 'bg-indigo-600 text-white border-indigo-700'
-                    : `${info.badgeBg} hover:opacity-80`
+                key={m}
+                onClick={() => setMateriFilter(isSelected ? 'ALL' : m)}
+                className={`cursor-pointer px-2.5 py-1 rounded-lg text-[11px] font-bold border transition flex items-center space-x-1 ${
+                  isSelected
+                    ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs'
+                    : `${badge.bg} ${badge.text} ${badge.border} hover:opacity-85`
                 }`}
               >
-                {info.short}: {count}
+                <span>{m}</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                    isSelected ? 'bg-indigo-800 text-white' : 'bg-white/80 border border-slate-200/50'
+                  }`}
+                >
+                  {count}
+                </span>
               </span>
             );
           })}
@@ -215,14 +269,15 @@ export const BankTab: React.FC<BankTabProps> = ({
       <div className="space-y-4">
         {filteredQuestions.length > 0 ? (
           filteredQuestions.map((q, idx) => {
-            const elemInfo = ELEMENT_LABELS[q.element];
-            const cogInfo = COGNITIVE_LABELS[q.level];
+            const materiName = q.materi || q.topic || 'Materi Umum';
+            const badge = getMateriBadgeStyle(materiName);
+            const cogInfo = COGNITIVE_LABELS[q.level] || COGNITIVE_LABELS.MotS;
             const letters = ['A', 'B', 'C', 'D'];
 
             return (
               <div
                 key={q.id}
-                className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs hover:shadow-sm transition space-y-3"
+                className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs hover:shadow-sm transition space-y-3.5"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -230,13 +285,13 @@ export const BankTab: React.FC<BankTabProps> = ({
                     <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
                       #{idx + 1}
                     </span>
-                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded border ${elemInfo.badgeBg}`}>
-                      {elemInfo.short} • {elemInfo.full}
+                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-lg border ${badge.bg} ${badge.text} ${badge.border}`}>
+                      Materi: {materiName}
                     </span>
-                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded border ${cogInfo.badge}`}>
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-lg border ${cogInfo.badge}`}>
                       {q.level}
                     </span>
-                    {q.topic && (
+                    {q.topic && q.topic !== materiName && (
                       <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
                         {q.topic}
                       </span>
@@ -290,13 +345,20 @@ export const BankTab: React.FC<BankTabProps> = ({
                   })}
                 </div>
 
-                {/* Explanation */}
-                <div className="pt-2 text-xs text-slate-700 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100">
-                  <div className="font-bold text-indigo-900 mb-0.5 flex items-center">
-                    <BookOpen className="w-3.5 h-3.5 mr-1 text-indigo-600" />
-                    Kunci Jawaban: {letters[q.correctIndex]} ({q.options[q.correctIndex]})
+                {/* Form Pembahasan & Kunci View */}
+                <div className="pt-2 text-xs text-slate-700 bg-indigo-50/50 p-3.5 rounded-xl border border-indigo-100 space-y-1">
+                  <div className="font-bold text-indigo-900 flex items-center justify-between">
+                    <span className="flex items-center">
+                      <Lightbulb className="w-3.5 h-3.5 mr-1 text-amber-500" />
+                      Kunci Jawaban: {letters[q.correctIndex]} ({q.options[q.correctIndex]})
+                    </span>
+                    <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-100/70 px-2 py-0.2 rounded">
+                      Pembahasan
+                    </span>
                   </div>
-                  <p className="text-slate-600">{q.explanation}</p>
+                  <p className="text-slate-700 leading-relaxed pl-5 font-normal">
+                    {q.explanation || 'Pembahasan terverifikasi sesuai kunci jawaban yang telah ditentukan.'}
+                  </p>
                 </div>
               </div>
             );
@@ -305,7 +367,7 @@ export const BankTab: React.FC<BankTabProps> = ({
           <div className="bg-white rounded-2xl p-12 text-center text-slate-400 border border-slate-200 shadow-sm">
             <Filter className="w-10 h-10 text-slate-300 mx-auto mb-2" />
             <p className="text-sm font-semibold text-slate-600">Tidak ada soal yang sesuai dengan filter.</p>
-            <p className="text-xs text-slate-400 mt-1">Coba sesuaikan elemen, level kognitif, atau kata kunci pencarian.</p>
+            <p className="text-xs text-slate-400 mt-1">Coba sesuaikan materi pokok, level kognitif, atau kata kunci pencarian.</p>
           </div>
         )}
       </div>

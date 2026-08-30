@@ -285,14 +285,14 @@ export const MaterialUploadModal: React.FC<MaterialUploadModalProps> = ({
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Jumlah Butir Soal:
+                      Jumlah Butir Soal (Maks. 50):
                     </label>
                     <input
                       type="number"
                       min={1}
-                      max={20}
+                      max={50}
                       value={questionCount}
-                      onChange={(e) => setQuestionCount(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+                      onChange={(e) => setQuestionCount(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
                       className="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 bg-white"
                     />
                   </div>
