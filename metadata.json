@@ -1,0 +1,6 @@
+{
+  "name": "Generator Soal Informatika IX",
+  "description": "Generator dan pengacak paket naskah soal Informatika Kelas IX Kurikulum Merdeka (Paket A, B, C, D) lengkap dengan Bank Soal dan Kunci Pembahasan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
