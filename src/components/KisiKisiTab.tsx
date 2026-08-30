@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Question,
   PackageQuestion,
@@ -103,6 +103,20 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
     });
     return counts;
   }, [allKisiItems]);
+
+  // List of elements that actually exist in the current source
+  const availableElementsInSource = useMemo(() => {
+    return (Object.keys(ELEMENT_LABELS) as InformaticsElement[]).filter(
+      (elem) => (elementDistribution[elem] || 0) > 0
+    );
+  }, [elementDistribution]);
+
+  // Auto-reset element filter if the selected element does not exist in the newly selected source
+  useEffect(() => {
+    if (selectedElementFilter !== 'ALL' && !elementDistribution[selectedElementFilter]) {
+      setSelectedElementFilter('ALL');
+    }
+  }, [selectedSource, elementDistribution, selectedElementFilter]);
 
   const levelDistribution = useMemo(() => {
     let lots = 0;
@@ -227,20 +241,25 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
             </select>
           </div>
 
-          {/* 2. Filter Elemen */}
+          {/* 2. Filter Elemen (Menyesuaikan Sumber Kisi-Kisi) */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
-              Filter Elemen:
+            <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
+              <span>Filter Elemen:</span>
+              <span className="text-[10px] text-indigo-600 normal-case font-semibold">
+                {availableElementsInSource.length} Elemen Aktif
+              </span>
             </label>
             <select
               value={selectedElementFilter}
               onChange={(e) => setSelectedElementFilter(e.target.value as any)}
               className="w-full rounded-xl border-slate-300 border px-3 py-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50"
             >
-              <option value="ALL">Semua Elemen Informatika ({allKisiItems.length})</option>
-              {(Object.keys(ELEMENT_LABELS) as InformaticsElement[]).map((elem) => (
+              <option value="ALL">
+                Semua Elemen di {packageLetter ? `Paket ${packageLetter}` : 'Bank'} ({allKisiItems.length} Soal)
+              </option>
+              {availableElementsInSource.map((elem) => (
                 <option key={elem} value={elem}>
-                  {elem} - {ELEMENT_LABELS[elem].short} ({elementDistribution[elem] || 0})
+                  {elem} - {ELEMENT_LABELS[elem].short} ({elementDistribution[elem] || 0} Soal)
                 </option>
               ))}
             </select>
@@ -279,6 +298,73 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
               />
             </div>
           </div>
+        </div>
+
+        {/* Dynamic Source-Adaptive Element Filter Chips */}
+        <div className="mt-3.5 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px] font-bold text-slate-500 mr-1 flex items-center space-x-1">
+            <span>Elemen {packageLetter ? `Paket ${packageLetter}` : 'Bank Master'}:</span>
+          </span>
+
+          {/* All Button */}
+          <button
+            type="button"
+            onClick={() => setSelectedElementFilter('ALL')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
+              selectedElementFilter === 'ALL'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            <span>Semua</span>
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                selectedElementFilter === 'ALL' ? 'bg-indigo-800 text-white' : 'bg-slate-200 text-slate-700'
+              }`}
+            >
+              {allKisiItems.length}
+            </span>
+          </button>
+
+          {/* Individual Element Buttons Present in this Source */}
+          {availableElementsInSource.map((elem) => {
+            const isSelected = selectedElementFilter === elem;
+            const count = elementDistribution[elem] || 0;
+            const info = ELEMENT_LABELS[elem];
+
+            return (
+              <button
+                key={elem}
+                type="button"
+                onClick={() => setSelectedElementFilter(elem)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 border ${
+                  isSelected
+                    ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs ring-1 ring-indigo-400'
+                    : `${info.badgeBg} hover:opacity-90`
+                }`}
+                title={`Filter hanya elemen ${info.full} (${count} butir soal)`}
+              >
+                <span>{elem}</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                    isSelected ? 'bg-indigo-800 text-white' : 'bg-white/90 text-slate-800 border border-slate-200/60'
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+
+          {selectedElementFilter !== 'ALL' && (
+            <button
+              type="button"
+              onClick={() => setSelectedElementFilter('ALL')}
+              className="text-[11px] text-rose-600 hover:text-rose-800 font-bold ml-1 transition underline"
+            >
+              Reset Filter
+            </button>
+          )}
         </div>
 
         {/* Cognitive & Element Badges Summary */}
