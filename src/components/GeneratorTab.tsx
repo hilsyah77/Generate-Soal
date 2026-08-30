@@ -37,6 +37,8 @@ interface GeneratorTabProps {
   onOpenHeaderModal: () => void;
   onOpenKisiKisi?: () => void;
   onOpenMaterialModal?: () => void;
+  onOpenAddQuestion?: () => void;
+  onLoadDefault?: () => void;
 }
 
 export const GeneratorTab: React.FC<GeneratorTabProps> = ({
@@ -50,6 +52,8 @@ export const GeneratorTab: React.FC<GeneratorTabProps> = ({
   onOpenHeaderModal,
   onOpenKisiKisi,
   onOpenMaterialModal,
+  onOpenAddQuestion,
+  onLoadDefault,
 }) => {
   const [activePkg, setActivePkg] = useState<PackageKey>('A');
   const [showAnswers, setShowAnswers] = useState(false);
@@ -154,6 +158,50 @@ export const GeneratorTab: React.FC<GeneratorTabProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Empty Bank Alert Banner */}
+      {questionBank.length === 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 sm:p-6 no-print shadow-xs space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold text-amber-950 flex items-center">
+                <BookOpen className="w-4 h-4 mr-2 text-amber-600" />
+                Bank Soal Masih Kosong (Data Demo Telah Dihapus)
+              </h3>
+              <p className="text-xs text-amber-800">
+                Silakan tambahkan butir soal baru, unggah teks modul materi, atau muat 400 soal standar bawaan untuk mulai meracik paket soal A, B, C, dan D.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+              {onOpenAddQuestion && (
+                <button
+                  onClick={onOpenAddQuestion}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition"
+                >
+                  + Tambah Soal
+                </button>
+              )}
+              {onOpenMaterialModal && (
+                <button
+                  onClick={onOpenMaterialModal}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-xs transition"
+                >
+                  Upload Materi
+                </button>
+              )}
+              {onLoadDefault && (
+                <button
+                  onClick={onLoadDefault}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition"
+                >
+                  Muat 400 Soal Standar
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Control Panel */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 no-print">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">

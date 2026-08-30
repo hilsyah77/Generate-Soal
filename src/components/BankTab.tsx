@@ -17,6 +17,9 @@ import {
   BookOpen,
   Layers,
   Lightbulb,
+  Database,
+  Sparkles,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { exportBankToJson } from '../utils/generator';
 
@@ -26,6 +29,8 @@ interface BankTabProps {
   onEditQuestion: (q: Question) => void;
   onDeleteQuestion: (id: string) => void;
   onResetDefault: () => void;
+  onClearAll?: () => void;
+  onOpenMaterialModal?: () => void;
   onImportBank: (imported: Question[]) => void;
   onToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
 }
@@ -36,6 +41,8 @@ export const BankTab: React.FC<BankTabProps> = ({
   onEditQuestion,
   onDeleteQuestion,
   onResetDefault,
+  onClearAll,
+  onOpenMaterialModal,
   onImportBank,
   onToast,
 }) => {
@@ -192,22 +199,35 @@ export const BankTab: React.FC<BankTabProps> = ({
               <span>Impor JSON</span>
             </button>
 
-            <button
-              onClick={handleExport}
-              className="px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition flex items-center space-x-1.5"
-              title="Unduh seluruh bank soal ke JSON"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Ekspor JSON</span>
-            </button>
+            {questionBank.length > 0 && (
+              <button
+                onClick={handleExport}
+                className="px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition flex items-center space-x-1.5"
+                title="Unduh seluruh bank soal ke JSON"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Ekspor JSON</span>
+              </button>
+            )}
+
+            {questionBank.length > 0 && onClearAll && (
+              <button
+                onClick={onClearAll}
+                className="px-3 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition flex items-center space-x-1.5"
+                title="Hapus seluruh data dari bank soal & paket"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Hapus Semua Data</span>
+              </button>
+            )}
 
             <button
               onClick={onResetDefault}
-              className="px-3 py-2 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition flex items-center space-x-1.5"
-              title="Kembalikan ke paket soal Kurikulum Merdeka default"
+              className="px-3 py-2 rounded-xl text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition flex items-center space-x-1.5"
+              title="Muat kembali 400 butir soal Kurikulum Merdeka default"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset Default</span>
+              <span>Muat Data Standar (400 Soal)</span>
             </button>
 
             <button
@@ -363,6 +383,78 @@ export const BankTab: React.FC<BankTabProps> = ({
               </div>
             );
           })
+        ) : questionBank.length === 0 ? (
+          <div className="bg-white rounded-2xl p-8 sm:p-12 text-center border border-slate-200 shadow-sm space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto text-indigo-600 shadow-inner">
+              <Database className="w-8 h-8" />
+            </div>
+
+            <div className="max-w-md mx-auto space-y-2">
+              <h3 className="text-base sm:text-lg font-black text-slate-900">
+                Bank Soal Masih Kosong
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                Seluruh data demo aplikasi telah dibersihkan. Anda dapat mulai menambahkan butir soal baru secara manual, mengunggah materi pembelajaran, atau memuat kembali 400 butir soal standar bawaan.
+              </p>
+            </div>
+
+            {/* Quick Actions Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
+              <button
+                onClick={onAddQuestion}
+                className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 hover:border-emerald-300 text-left transition group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center mb-2.5 shadow-sm group-hover:scale-105 transition">
+                  <Plus className="w-4 h-4" />
+                </div>
+                <span className="block text-xs font-bold text-emerald-950">Tambah Manual</span>
+                <span className="text-[11px] text-emerald-700 leading-snug block mt-0.5">
+                  Input soal, 4 opsi pilihan, kunci & pembahasan
+                </span>
+              </button>
+
+              {onOpenMaterialModal && (
+                <button
+                  onClick={onOpenMaterialModal}
+                  className="p-4 rounded-xl border border-violet-200 bg-violet-50/50 hover:bg-violet-50 hover:border-violet-300 text-left transition group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-violet-600 text-white flex items-center justify-center mb-2.5 shadow-sm group-hover:scale-105 transition">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <span className="block text-xs font-bold text-violet-950">Upload Materi</span>
+                  <span className="text-[11px] text-violet-700 leading-snug block mt-0.5">
+                    Ekstrak soal otomatis dari teks modul/bab
+                  </span>
+                </button>
+              )}
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 text-left transition group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center mb-2.5 shadow-sm group-hover:scale-105 transition">
+                  <Upload className="w-4 h-4" />
+                </div>
+                <span className="block text-xs font-bold text-slate-900">Impor JSON</span>
+                <span className="text-[11px] text-slate-500 leading-snug block mt-0.5">
+                  Unggah berkas cadangan bank soal JSON
+                </span>
+              </button>
+
+              <button
+                onClick={onResetDefault}
+                className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/60 hover:bg-indigo-100/60 text-left transition group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center mb-2.5 shadow-sm group-hover:scale-105 transition">
+                  <RotateCcw className="w-4 h-4" />
+                </div>
+                <span className="block text-xs font-bold text-indigo-950">Muat 400 Soal Standar</span>
+                <span className="text-[11px] text-indigo-700 leading-snug block mt-0.5">
+                  8 Materi Pokok Kurikulum Merdeka Fase D
+                </span>
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="bg-white rounded-2xl p-12 text-center text-slate-400 border border-slate-200 shadow-sm">
             <Filter className="w-10 h-10 text-slate-300 mx-auto mb-2" />

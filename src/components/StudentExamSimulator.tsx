@@ -24,11 +24,13 @@ import {
 interface StudentExamSimulatorProps {
   packages: GeneratedPackages;
   onToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
+  onNavigateToGenerator?: () => void;
 }
 
 export const StudentExamSimulator: React.FC<StudentExamSimulatorProps> = ({
   packages,
   onToast,
+  onNavigateToGenerator,
 }) => {
   const availablePackages: PackageKey[] = (['A', 'B', 'C', 'D'] as PackageKey[]).filter(
     (k) => packages[k] && packages[k]!.length > 0
@@ -42,6 +44,34 @@ export const StudentExamSimulator: React.FC<StudentExamSimulatorProps> = ({
   const [timerActive, setTimerActive] = useState<boolean>(false);
 
   const activeQuestions: PackageQuestion[] = packages[selectedPkg] || [];
+
+  if (availablePackages.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 p-8 sm:p-12 text-center shadow-sm space-y-4 max-w-2xl mx-auto my-8">
+        <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto text-indigo-600 shadow-inner">
+          <GraduationCap className="w-8 h-8" />
+        </div>
+        <div className="space-y-1.5">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900">
+            Belum Ada Paket Ujian untuk Simulasi
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+            Seluruh data demo telah dihapus. Silakan buat atau racik paket soal di menu Generator terlebih dahulu untuk memulai simulasi ujian CBT interaktif.
+          </p>
+        </div>
+        {onNavigateToGenerator && (
+          <div className="pt-2">
+            <button
+              onClick={onNavigateToGenerator}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition inline-flex items-center space-x-1.5"
+            >
+              <span>Buka Menu Generator</span>
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // Reset exam state when package changes
   useEffect(() => {

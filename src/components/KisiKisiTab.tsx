@@ -31,6 +31,8 @@ interface KisiKisiTabProps {
   onToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
   onNavigateToGenerator: () => void;
   onOpenHeaderModal: () => void;
+  onOpenAddQuestion?: () => void;
+  onLoadDefault?: () => void;
 }
 
 export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
@@ -38,6 +40,9 @@ export const KisiKisiTab: React.FC<KisiKisiTabProps> = ({
   packages,
   headerConfig,
   onToast,
+  onOpenHeaderModal,
+  onOpenAddQuestion,
+  onLoadDefault,
 }) => {
   // Available packages
   const activePackageKeys = Object.keys(packages) as PackageKey[];

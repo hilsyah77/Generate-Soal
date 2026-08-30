@@ -18,22 +18,22 @@ import { SchoolHeaderModal, defaultExamHeader } from './components/SchoolHeaderM
 import { MaterialUploadModal } from './components/MaterialUploadModal';
 import { ToastContainer, ToastMessage } from './components/Toast';
 
-const STORAGE_KEY_BANK = 'smp_informatics_grade9_bank_v4';
+const STORAGE_KEY_BANK = 'smp_informatics_grade9_bank_empty_v1';
 const STORAGE_KEY_HEADER = 'smp_informatics_grade9_header_v2';
 
 export default function App() {
-  // 1. Bank Soal State
+  // 1. Bank Soal State (Default clean/empty state when demo data is removed)
   const [questionBank, setQuestionBank] = useState<Question[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_BANK);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= DEFAULT_QUESTIONS.length) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {
       console.error('Failed to load bank from storage:', e);
     }
-    return DEFAULT_QUESTIONS;
+    return [];
   });
 
   // 2. Exam Header Configuration State
@@ -104,7 +104,7 @@ export default function App() {
   // Generate packages handler
   const handleGenerate = useCallback(() => {
     if (questionBank.length === 0) {
-      showToast('Bank soal kosong! Tambahkan soal terlebih dahulu.', 'error');
+      showToast('Bank soal kosong! Tambahkan soal atau muat bank soal bawaan terlebih dahulu.', 'error');
       return;
     }
     const result = generatePackages(questionBank, generatorConfig);
@@ -112,10 +112,14 @@ export default function App() {
     showToast(`Berhasil meracik ${generatorConfig.packages.length} paket soal!`, 'success');
   }, [questionBank, generatorConfig, showToast]);
 
-  // Auto-generate on initial mount
+  // Initial mount check
   useEffect(() => {
-    const result = generatePackages(questionBank, generatorConfig);
-    setPackages(result);
+    if (questionBank.length > 0) {
+      const result = generatePackages(questionBank, generatorConfig);
+      setPackages(result);
+    } else {
+      setPackages({});
+    }
   }, []);
 
   // Question CRUD handlers
@@ -145,10 +149,27 @@ export default function App() {
     }
   };
 
+  const handleClearAllData = () => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus SEMUA data dari aplikasi (mengosongkan bank soal dan paket naskah ujian)?')) {
+      setQuestionBank([]);
+      setPackages({});
+      try {
+        localStorage.removeItem(STORAGE_KEY_BANK);
+        localStorage.removeItem('smp_informatics_grade9_bank_v4');
+        localStorage.removeItem('smp_informatics_grade9_bank_v3');
+        localStorage.removeItem('smp_informatics_grade9_bank_v2');
+        localStorage.removeItem('smp_informatics_grade9_bank_v1');
+      } catch (e) {
+        console.error('Failed to clear storage:', e);
+      }
+      showToast('Semua data demo berhasil dihapus. Bank soal sekarang kosong!', 'success');
+    }
+  };
+
   const handleResetDefault = () => {
-    if (window.confirm('Kembalikan seluruh bank soal ke standar 400 butir soal (50 butir per materi) Kurikulum Merdeka default?')) {
+    if (window.confirm('Muat 400 butir bank soal bawaan (50 butir per materi) Kurikulum Merdeka Informatika Kelas IX?')) {
       setQuestionBank(DEFAULT_QUESTIONS);
-      showToast('Bank soal berhasil dikembalikan ke standar default (400 butir)!', 'info');
+      showToast('Bank soal bawaan (400 butir) berhasil dimuat!', 'success');
     }
   };
 
@@ -185,6 +206,11 @@ export default function App() {
             onOpenHeaderModal={() => setIsHeaderModalOpen(true)}
             onOpenKisiKisi={() => setActiveTab('kisikisi')}
             onOpenMaterialModal={() => setIsMaterialModalOpen(true)}
+            onOpenAddQuestion={() => {
+              setQuestionToEdit(null);
+              setIsQuestionModalOpen(true);
+            }}
+            onLoadDefault={handleResetDefault}
           />
         )}
 
@@ -196,6 +222,11 @@ export default function App() {
             onToast={showToast}
             onNavigateToGenerator={() => setActiveTab('generator')}
             onOpenHeaderModal={() => setIsHeaderModalOpen(true)}
+            onOpenAddQuestion={() => {
+              setQuestionToEdit(null);
+              setIsQuestionModalOpen(true);
+            }}
+            onLoadDefault={handleResetDefault}
           />
         )}
 
@@ -212,13 +243,19 @@ export default function App() {
             }}
             onDeleteQuestion={handleDeleteQuestion}
             onResetDefault={handleResetDefault}
+            onClearAll={handleClearAllData}
+            onOpenMaterialModal={() => setIsMaterialModalOpen(true)}
             onImportBank={handleImportBank}
             onToast={showToast}
           />
         )}
 
         {activeTab === 'student' && (
-          <StudentExamSimulator packages={packages} onToast={showToast} />
+          <StudentExamSimulator
+            packages={packages}
+            onToast={showToast}
+            onNavigateToGenerator={() => setActiveTab('generator')}
+          />
         )}
 
         {activeTab === 'matrix' && (
